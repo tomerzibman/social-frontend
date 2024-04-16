@@ -1,9 +1,38 @@
-// import { useState } from "react";
+import { useState, useEffect } from "react";
+
+import Feed from "./components/Feed";
+import PostForm from "./components/PostForm";
+
+import postsService from "./services/posts";
 
 function App() {
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    postsService.getAll().then((firstPosts) => {
+      setPosts(firstPosts);
+    });
+  }, []);
+
+  const incrementLikeOf = (postId) => {
+    const post = posts.find((post) => post.id == postId);
+    const updatedPost = { ...post, likes: post.likes + 1 };
+    const updatedPosts = posts.map((post) =>
+      post.id == postId ? updatedPost : post
+    );
+    setPosts(updatedPosts);
+  };
+
+  const createPost = (postToAdd) => {
+    postsService.create(postToAdd).then((newPost) => {
+      setPosts(posts.concat(newPost));
+    });
+  };
+
   return (
     <>
-      <p>Hello World</p>
+      <PostForm createPost={createPost} />
+      <Feed posts={posts} incrementLikeOf={incrementLikeOf} />
     </>
   );
 }
