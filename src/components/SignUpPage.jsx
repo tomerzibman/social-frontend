@@ -1,19 +1,47 @@
 import { useState } from "react";
 
-const SignUpPage = () => {
+const SignUpPage = ({ handleSignUp }) => {
   const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const doSignUp = async (event) => {
+    event.preventDefault();
+    const userData = {
+      username,
+      name,
+      password,
+      confirmPassword,
+    };
+    try {
+      await handleSignUp(userData);
+      setUsername("");
+      setName("");
+      setPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div>
-      <form>
+      <form onSubmit={doSignUp}>
         <div>
           username:
           <input
             type="text"
             value={username}
             onChange={({ target }) => setUsername(target.value)}
+          />
+        </div>
+        <div>
+          name:
+          <input
+            type="text"
+            value={name}
+            onChange={({ target }) => setName(target.value)}
           />
         </div>
         <div>

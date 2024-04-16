@@ -5,7 +5,7 @@ import PostForm from "./components/PostForm";
 
 import postsService from "./services/posts";
 import loginService from "./services/login";
-import LoginPage from "./components/LoginPage";
+import LoginOrSignUp from "./components/LoginOrSignUp";
 
 function App() {
   const [posts, setPosts] = useState([]);
@@ -65,7 +65,7 @@ function App() {
 
   return (
     <>
-      {!loggedIn && <LoginPage handleLogin={handleLogin} />}
+      {!loggedIn && <LoginOrSignUp handleLogin={handleLogin} />}
       {loggedIn && (
         <>
           <PostForm createPost={createPost} />
