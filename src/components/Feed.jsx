@@ -7,7 +7,7 @@ const Feed = ({ posts, incrementLikeOf }) => {
         <Post
           key={post.id}
           title={post.title}
-          author={post.author}
+          username={post.user.username}
           content={post.content}
           likes={post.likes}
           incrementLike={() => incrementLikeOf(post.id)}

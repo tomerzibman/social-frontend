@@ -16,7 +16,6 @@ const PostForm = ({ createPost }) => {
     const postObject = {
       title,
       content,
-      author: "Userr",
       likes: 0,
     };
     await createPost(postObject);

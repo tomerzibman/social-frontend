@@ -8,12 +8,12 @@ const postStyle = {
   boxSizing: "border-box",
 };
 
-const Post = ({ title, author, content, likes, incrementLike }) => {
+const Post = ({ title, username, content, likes, incrementLike }) => {
   return (
     <div style={postStyle}>
       <div>
         <h3>{title}</h3>
-        <p>By: {author}</p>
+        <p>By: {username}</p>
       </div>
       <p>{content}</p>
       <div>
