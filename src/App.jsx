@@ -64,7 +64,7 @@ function App() {
   };
 
   return (
-    <>
+    <div className="container">
       {!loggedIn && <LoginOrSignUp handleLogin={handleLogin} />}
       {loggedIn && (
         <>
@@ -72,7 +72,7 @@ function App() {
           <Feed posts={posts} incrementLikeOf={incrementLikeOf} />
         </>
       )}
-    </>
+    </div>
   );
 }
 
