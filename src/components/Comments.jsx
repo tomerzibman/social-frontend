@@ -1,11 +1,14 @@
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
 const Comment = ({ username, content, createdAt }) => {
+  dayjs.extend(relativeTime);
+  const displayDate = dayjs(createdAt).fromNow();
   return (
-    <div className="comment mt-2">
+    <div className="comment mt-0 mb-2">
       <strong>{username}</strong>
       <p className="mb-0">{content}</p>
-      <small className="text-muted">
-        {new Date(createdAt).toLocaleString()}
-      </small>
+      <small className="text-muted">{displayDate}</small>
     </div>
   );
 };
@@ -18,7 +21,7 @@ const Comments = ({ comments }) => {
     <>
       {comments.length > 0 && (
         <div className="comments">
-          <h2 className="mt-4">Comments</h2>
+          <h3 className="mt-2">Comments</h3>
           <div
             className="comments-list"
             style={{ maxHeight: "200px", overflowY: "auto" }}

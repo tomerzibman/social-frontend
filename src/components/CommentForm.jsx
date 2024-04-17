@@ -24,7 +24,7 @@ const CommentForm = ({ postId, createComment }) => {
           onChange={({ target }) => setComment(target.value)}
         ></textarea>
       </div>
-      <button type="submit" className="btn btn-primary float-right mt-1">
+      <button type="submit" className="btn btn-primary float-right mt-2">
         Add Comment
       </button>
     </form>

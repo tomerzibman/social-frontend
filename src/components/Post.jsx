@@ -26,8 +26,8 @@ const Post = ({
             likes={likes}
             incrementLike={incrementLike}
           />
-          <CommentForm postId={id} createComment={createComment} />
           <Comments comments={comments} />
+          <CommentForm postId={id} createComment={createComment} />
         </div>
       </div>
     </div>

@@ -17,7 +17,6 @@ const PostForm = ({ createPost }) => {
     const postObject = {
       title,
       content,
-      likes: 0,
     };
     await createPost(postObject);
     setTitle("");
