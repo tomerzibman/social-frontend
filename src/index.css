@@ -42,4 +42,36 @@ body {
   .btn {
     cursor: pointer;
   }
+
+  .comments {
+    max-height: 300px; /* Set the maximum height of the comments component */
+    overflow-y: auto; /* Add vertical scrollbar if content exceeds container's height */
+  }
+  
+  .comments-list {
+    padding-right: 20px; /* Add some padding to prevent content from being hidden behind scrollbar */
+  }
+  
+  .comment {
+    background-color: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .comment strong {
+    color: #333333;
+    font-weight: bold;
+  }
+  
+  .comment p {
+    margin-top: 6px;
+    margin-bottom: 0;
+  }
+  
+  .comment small {
+    color: #999999;
+    font-size: 12px;
+  }
   
