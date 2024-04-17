@@ -19,6 +19,7 @@ const Feed = ({ posts, incrementLikeOf, createComment }) => {
             createdAt={post.createdAt}
             incrementLike={() => incrementLikeOf(post.id)}
             createComment={createComment}
+            photo={post.user.photo}
           />
         </div>
       ))}

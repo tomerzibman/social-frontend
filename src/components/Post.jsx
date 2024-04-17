@@ -13,11 +13,12 @@ const Post = ({
   comments,
   incrementLike,
   createComment,
+  photo,
 }) => {
   return (
     <div className="postCard mt-2">
       <div className="card">
-        <PostHeader username={username} createdAt={createdAt} />
+        <PostHeader username={username} createdAt={createdAt} photo={photo} />
         <div className="card-body">
           <PostContent
             title={title}

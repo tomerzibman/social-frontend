@@ -1,14 +1,19 @@
-const Comment = ({ username, content }) => {
+const Comment = ({ username, content, createdAt }) => {
   return (
     <div className="comment mt-2">
       <strong>{username}</strong>
       <p className="mb-0">{content}</p>
-      <small className="text-muted">{new Date().toLocaleString()}</small>
+      <small className="text-muted">
+        {new Date(createdAt).toLocaleString()}
+      </small>
     </div>
   );
 };
 
 const Comments = ({ comments }) => {
+  const sortedComments = [...comments].sort(
+    (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+  );
   return (
     <>
       {comments.length > 0 && (
@@ -18,11 +23,12 @@ const Comments = ({ comments }) => {
             className="comments-list"
             style={{ maxHeight: "200px", overflowY: "auto" }}
           >
-            {comments.map((comment) => (
+            {sortedComments.map((comment) => (
               <Comment
                 key={comment.id}
                 username={comment.user.username}
                 content={comment.content}
+                createdAt={comment.createdAt}
               />
             ))}
           </div>
