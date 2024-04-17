@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 
 import Feed from "./components/Feed";
 import PostForm from "./components/PostForm";
+import LoginOrSignUp from "./components/LoginOrSignUp";
 
 import postsService from "./services/posts";
 import loginService from "./services/login";
-import LoginOrSignUp from "./components/LoginOrSignUp";
+import commentService from "./services/comments";
 
 function App() {
   const [posts, setPosts] = useState([]);
@@ -33,6 +34,7 @@ function App() {
       const userData = await loginService.login(credentials);
       setUser(userData);
       postsService.setToken(userData.token);
+      commentService.setToken(userData.token);
       window.localStorage.setItem("loggedInUser", JSON.stringify(userData));
     } catch (error) {
       console.log(error);
@@ -63,13 +65,34 @@ function App() {
     }
   };
 
+  const createComment = async (commentToAdd) => {
+    try {
+      const newComment = await commentService.create(commentToAdd);
+      const postToEdit = posts.find((post) => post.id === commentToAdd.postId);
+      const updatedPost = {
+        ...postToEdit,
+        comments: postToEdit.comments.concat(newComment),
+      };
+      const newPosts = posts.map((post) =>
+        post.id === commentToAdd.postId ? updatedPost : post
+      );
+      setPosts(newPosts);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className="container">
       {!loggedIn && <LoginOrSignUp handleLogin={handleLogin} />}
       {loggedIn && (
         <>
           <PostForm createPost={createPost} />
-          <Feed posts={posts} incrementLikeOf={incrementLikeOf} />
+          <Feed
+            posts={posts}
+            incrementLikeOf={incrementLikeOf}
+            createComment={createComment}
+          />
         </>
       )}
     </div>

@@ -10,18 +10,22 @@ const Comment = ({ username, content }) => {
 
 const Comments = ({ comments }) => {
   return (
-    <div className="comments">
-      <h2>Comments</h2>
-      <div className="comments-list">
-        {comments.map((comment) => (
-          <Comment
-            key={comment.id}
-            username={comment.user.username}
-            content={comment.content}
-          />
-        ))}
-      </div>
-    </div>
+    <>
+      {comments.length > 0 && (
+        <div className="comments">
+          <h2>Comments</h2>
+          <div className="comments-list">
+            {comments.map((comment) => (
+              <Comment
+                key={comment.id}
+                username={comment.user.username}
+                content={comment.content}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

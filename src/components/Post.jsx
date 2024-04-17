@@ -4,28 +4,16 @@ import CommentForm from "./CommentForm";
 import Comments from "./Comments";
 
 const Post = ({
+  id,
   title,
   username,
   content,
   likes,
   createdAt,
+  comments,
   incrementLike,
+  createComment,
 }) => {
-  const comments = [
-    {
-      user: {
-        username: "swgger",
-      },
-      content: "this is a comment",
-    },
-    {
-      user: {
-        username: "peppermint",
-      },
-      content: "i like elmo cuz hes red",
-    },
-  ];
-
   return (
     <div className="postCard">
       <div className="card">
@@ -37,7 +25,7 @@ const Post = ({
             likes={likes}
             incrementLike={incrementLike}
           />
-          <CommentForm />
+          <CommentForm postId={id} createComment={createComment} />
           <Comments comments={comments} />
         </div>
       </div>
