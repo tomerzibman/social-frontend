@@ -1,4 +1,4 @@
-/* Global Styles */
+/*Global Styles
 
 body {
     font-family: 'Arial', sans-serif;
@@ -44,12 +44,12 @@ body {
   }
 
   .comments {
-    max-height: 300px; /* Set the maximum height of the comments component */
-    overflow-y: auto; /* Add vertical scrollbar if content exceeds container's height */
+    max-height: 300px; 
+    overflow-y: auto; 
   }
   
   .comments-list {
-    padding-right: 20px; /* Add some padding to prevent content from being hidden behind scrollbar */
+    padding-right: 20px; 
   }
   
   .comment {
@@ -74,4 +74,4 @@ body {
     color: #999999;
     font-size: 12px;
   }
-  
+  */

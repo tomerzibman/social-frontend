@@ -15,7 +15,7 @@ const Post = ({
   createComment,
 }) => {
   return (
-    <div className="postCard">
+    <div className="postCard mt-2">
       <div className="card">
         <PostHeader username={username} createdAt={createdAt} />
         <div className="card-body">

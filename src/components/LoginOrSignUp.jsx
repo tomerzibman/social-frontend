@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Button, Container, Row, Col } from "react-bootstrap";
 import LoginPage from "./LoginPage";
 import SignUpPage from "./SignUpPage";
 
@@ -20,16 +21,31 @@ const LoginOrSignUp = ({ handleLogin }) => {
     }
   };
 
-  const buttonLabel = signedUp
-    ? "Click here to create an account"
-    : "Click here to login";
+  const buttonVariant = signedUp ? "primary" : "secondary";
+  const buttonLabel = signedUp ? "Go to sign up" : "Go to log in";
 
   return (
-    <div>
-      {!signedUp && <SignUpPage handleSignUp={handleSignUp} />}
-      {signedUp && <LoginPage handleLogin={handleLogin} />}
-      <button onClick={toggleForm}>{buttonLabel}</button>
-    </div>
+    <Container>
+      <Row className="justify-content-center mt-5">
+        <Col md={6}>
+          {!signedUp ? (
+            <SignUpPage handleSignUp={handleSignUp} />
+          ) : (
+            <LoginPage handleLogin={handleLogin} />
+          )}
+
+          <div className="mt-3 text-center">
+            <Button
+              variant={buttonVariant}
+              onClick={toggleForm}
+              className="justify-content-left"
+            >
+              {buttonLabel}
+            </Button>
+          </div>
+        </Col>
+      </Row>
+    </Container>
   );
 };
 

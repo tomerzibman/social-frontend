@@ -6,20 +6,21 @@ const Feed = ({ posts, incrementLikeOf, createComment }) => {
   );
 
   return (
-    <div>
+    <div className="row">
       {sortedPosts.map((post) => (
-        <Post
-          key={post.id}
-          id={post.id}
-          title={post.title}
-          username={post.user.username}
-          content={post.content}
-          likes={post.likes}
-          comments={post.comments}
-          createdAt={post.createdAt}
-          incrementLike={() => incrementLikeOf(post.id)}
-          createComment={createComment}
-        />
+        <div className="mb-4" key={post.id}>
+          <Post
+            id={post.id}
+            title={post.title}
+            username={post.user.username}
+            content={post.content}
+            likes={post.likes}
+            comments={post.comments}
+            createdAt={post.createdAt}
+            incrementLike={() => incrementLikeOf(post.id)}
+            createComment={createComment}
+          />
+        </div>
       ))}
     </div>
   );

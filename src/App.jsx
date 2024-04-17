@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Container } from "react-bootstrap";
 
 import Feed from "./components/Feed";
 import PostForm from "./components/PostForm";
@@ -83,9 +84,10 @@ function App() {
   };
 
   return (
-    <div className="container">
-      {!loggedIn && <LoginOrSignUp handleLogin={handleLogin} />}
-      {loggedIn && (
+    <Container>
+      {!loggedIn ? (
+        <LoginOrSignUp handleLogin={handleLogin} />
+      ) : (
         <>
           <PostForm createPost={createPost} />
           <Feed
@@ -95,7 +97,7 @@ function App() {
           />
         </>
       )}
-    </div>
+    </Container>
   );
 }
 

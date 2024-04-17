@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Form, Button } from "react-bootstrap";
 
 const PostForm = ({ createPost }) => {
   const [title, setTitle] = useState("");
@@ -28,27 +29,34 @@ const PostForm = ({ createPost }) => {
     <div>
       {showForm && (
         <div>
-          <form onSubmit={addPost}>
-            <div>
-              <input
+          <Form onSubmit={addPost}>
+            <Form.Group controlId="postTitle">
+              <Form.Control
                 type="text"
                 value={title}
                 onChange={({ target }) => setTitle(target.value)}
                 placeholder="Title"
+                className="mt-5 mb-2"
               />
-            </div>
-            <div>
-              <textarea
+            </Form.Group>
+            <Form.Group controlId="postContent">
+              <Form.Control
+                as="textarea"
                 value={content}
                 onChange={({ target }) => setContent(target.value)}
-                placeholder="Content"
+                placeholder="What's on your mind?"
+                className="mb-2"
               />
-            </div>
-            <button type="submit">Create Post</button>
-          </form>
+            </Form.Group>
+            <Button variant="primary" type="submit">
+              Create Post
+            </Button>
+          </Form>
         </div>
       )}
-      <button onClick={toggleVisibility}>{buttonLabel}</button>
+      <Button onClick={toggleVisibility} className="mt-2">
+        {buttonLabel}
+      </Button>
     </div>
   );
 };

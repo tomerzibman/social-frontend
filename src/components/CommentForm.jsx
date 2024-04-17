@@ -2,6 +2,7 @@ import { useState } from "react";
 
 const CommentForm = ({ postId, createComment }) => {
   const [comment, setComment] = useState("");
+
   const addComment = async (event) => {
     event.preventDefault();
     const commentObj = {
@@ -23,7 +24,7 @@ const CommentForm = ({ postId, createComment }) => {
           onChange={({ target }) => setComment(target.value)}
         ></textarea>
       </div>
-      <button type="submit" className="btn btn-primary float-right">
+      <button type="submit" className="btn btn-primary float-right mt-1">
         Add Comment
       </button>
     </form>
