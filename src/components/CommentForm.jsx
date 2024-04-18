@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { Button, CardActions, TextField } from "@mui/material";
 
-const CommentForm = ({ postId, createComment }) => {
+const CommentForm = ({ createComment, postId }) => {
   const [comment, setComment] = useState("");
 
   const addComment = async (event) => {
@@ -14,20 +15,20 @@ const CommentForm = ({ postId, createComment }) => {
   };
 
   return (
-    <form onSubmit={addComment}>
-      <div className="form-group">
-        <textarea
-          className="form-control"
-          placeholder="Add a comment..."
-          rows="3"
-          value={comment}
-          onChange={({ target }) => setComment(target.value)}
-        ></textarea>
-      </div>
-      <button type="submit" className="btn btn-primary float-right mt-2">
-        Add Comment
-      </button>
-    </form>
+    <CardActions>
+      <TextField
+        fullWidth
+        variant="outlined"
+        placeholder="Add a comment..."
+        value={comment}
+        onChange={({ target }) => {
+          setComment(target.value);
+        }}
+      />
+      <Button variant="contained" color="primary" onClick={addComment}>
+        Comment
+      </Button>
+    </CardActions>
   );
 };
 

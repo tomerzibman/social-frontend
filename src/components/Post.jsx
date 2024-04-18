@@ -1,7 +1,9 @@
-import PostHeader from "./PostHeader";
+import { Card, Divider } from "@mui/material";
 import PostContent from "./PostContent";
+import PostHeader from "./PostHeader";
+import PostActions from "./PostActions";
+import CommentList from "./CommentList";
 import CommentForm from "./CommentForm";
-import Comments from "./Comments";
 
 const Post = ({
   id,
@@ -16,21 +18,19 @@ const Post = ({
   photo,
 }) => {
   return (
-    <div className="postCard mt-2">
-      <div className="card">
-        <PostHeader username={username} createdAt={createdAt} photo={photo} />
-        <div className="card-body">
-          <PostContent
-            title={title}
-            content={content}
-            likes={likes}
-            incrementLike={incrementLike}
-          />
-          <Comments comments={comments} />
-          <CommentForm postId={id} createComment={createComment} />
-        </div>
-      </div>
-    </div>
+    <Card sx={{ maxWidth: 600, margin: "auto", marginBottom: 2 }}>
+      <PostHeader username={username} date={createdAt} photo={photo} />
+      <PostContent title={title} content={content} />
+      <PostActions
+        likes={likes}
+        commentsCount={comments.length}
+        onLike={incrementLike}
+      />
+      <Divider />
+      <CommentList comments={comments} />
+      <Divider />
+      <CommentForm createComment={createComment} postId={id} />
+    </Card>
   );
 };
 

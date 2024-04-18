@@ -1,17 +1,14 @@
-const PostContent = ({ title, content, likes, incrementLike }) => {
-  return (
-    <div>
-      <h3 className="card-title">{title}</h3>
-      <p className="card-text">{content}</p>
-      <div className="d-flex justify-content-between align-items-center">
-        <p className="mb-0">Likes: {likes}</p>
-        <button className="btn btn-primary" onClick={incrementLike}>
-          Like Post
-        </button>
-      </div>
-      <hr />
-    </div>
-  );
-};
+import { CardContent, Typography } from "@mui/material";
+
+const PostContent = ({ title, content }) => (
+  <CardContent>
+    <Typography variant="h6" gutterBottom>
+      {title}
+    </Typography>
+    <Typography variant="body2" color="text.secondary">
+      {content}
+    </Typography>
+  </CardContent>
+);
 
 export default PostContent;

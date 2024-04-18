@@ -1,20 +1,11 @@
-import dayjs from "dayjs";
-import UserAvatar from "./UserAvatar";
-import relativeTime from "dayjs/plugin/relativeTime";
+import { Avatar, CardHeader } from "@mui/material";
 
-const PostHeader = ({ username, createdAt, photo }) => {
-  dayjs.extend(relativeTime);
-  const displayDate = dayjs(createdAt).fromNow();
-
-  return (
-    <div className="card-header d-flex align-items-center">
-      <UserAvatar photo={photo} />
-      <div className="ml-3">
-        <h5 className="mb-0">{username}</h5>
-        <small className="text-muted">{displayDate}</small>
-      </div>
-    </div>
-  );
-};
+const PostHeader = ({ username, date, photo }) => (
+  <CardHeader
+    avatar={<Avatar alt={username} src={photo} />}
+    title={username}
+    subheader={new Date(date).toLocaleDateString()}
+  />
+);
 
 export default PostHeader;
