@@ -8,9 +8,15 @@ const SignUpPage = ({ handleSignUp }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [photo, setPhoto] = useState(null);
   const [profilePicturePreview, setProfilePicturePreview] = useState(null);
+  const [validated, setValidated] = useState(false);
 
   const doSignUp = async (event) => {
     event.preventDefault();
+    const form = event.currentTarget;
+    if (form.checkValidity() === false) {
+      setValidated(true);
+      return;
+    }
 
     const userFormData = new FormData();
     userFormData.append("username", username);
@@ -26,7 +32,7 @@ const SignUpPage = ({ handleSignUp }) => {
       setPassword("");
       setConfirmPassword("");
     } catch (error) {
-      console.log(error);
+      console.log("Signup failed: ", error);
     }
   };
 
@@ -59,43 +65,84 @@ const SignUpPage = ({ handleSignUp }) => {
     });
   };
 
+  const usernameValid = (text) => {
+    const regex = /^[a-zA-Z0-9]+$/;
+    return regex.test(text);
+  };
+
+  const nameValid = (text) => {
+    const regex = /^[a-zA-Z0-9]+( [a-zA-Z0-9]+)*$/;
+    return regex.test(text);
+  };
+
+  const passwordValid = (text) => {
+    return text.length >= 5;
+  };
+
   return (
     <Container>
       <Row className="justify-content-center mt-5">
         <Col md={6}>
           <h2>Create Account</h2>
-          <Form onSubmit={doSignUp} encType="multipart/form-data">
+          <Form
+            noValidate
+            validated={validated}
+            onSubmit={doSignUp}
+            encType="multipart/form-data"
+          >
             <Form.Group controlId="formBasicUsername">
               <Form.Label className="mb-0">Username</Form.Label>
               <Form.Control
+                required
+                pattern="^[a-zA-Z0-9]+$"
                 className="mb-3"
                 type="text"
                 placeholder="Enter username"
                 value={username}
                 onChange={({ target }) => setUsername(target.value)}
+                isInvalid={validated && !usernameValid(username)}
               />
+              <Form.Control.Feedback type="invalid">
+                {username.length > 0
+                  ? "Username can only consist of letters and numbers"
+                  : "Username is required"}
+              </Form.Control.Feedback>
             </Form.Group>
 
             <Form.Group controlId="formBasicName">
               <Form.Label className="mb-0">Name</Form.Label>
               <Form.Control
+                required
+                pattern="^[a-zA-Z0-9]+( [a-zA-Z0-9]+)*$"
                 className="mb-3"
                 type="text"
                 placeholder="Enter your name"
                 value={name}
                 onChange={({ target }) => setName(target.value)}
+                isInvalid={validated && !nameValid(name)}
               />
+              <Form.Control.Feedback type="invalid">
+                {username.length > 0
+                  ? "Name can only consist of letters, numbers, and spaces"
+                  : "Name is required"}
+              </Form.Control.Feedback>
             </Form.Group>
 
             <Form.Group controlId="formBasicPassword">
               <Form.Label className="mb-0">Password</Form.Label>
               <Form.Control
+                required
+                pattern=".....(.)*"
                 className="mb-3"
                 type="password"
                 placeholder="Password"
                 value={password}
                 onChange={({ target }) => setPassword(target.value)}
+                isInvalid={validated && !passwordValid(password)}
               />
+              <Form.Control.Feedback type="invalid">
+                Password length must be at least 5
+              </Form.Control.Feedback>
             </Form.Group>
 
             <Form.Group controlId="formBasicConfirmPassword">
@@ -105,8 +152,15 @@ const SignUpPage = ({ handleSignUp }) => {
                 type="password"
                 placeholder="Confirm password"
                 value={confirmPassword}
+                pattern={password}
+                required
                 onChange={({ target }) => setConfirmPassword(target.value)}
+                isInvalid={validated && password !== confirmPassword}
+                isValid={validated && password === confirmPassword}
               />
+              <Form.Control.Feedback type="invalid">
+                Passwords must match
+              </Form.Control.Feedback>
             </Form.Group>
 
             <Form.Group controlId="formBasicProfilePicture">

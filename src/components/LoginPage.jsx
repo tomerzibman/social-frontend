@@ -4,6 +4,17 @@ import { Form, Button, Container, Row, Col } from "react-bootstrap";
 const LoginPage = ({ handleLogin }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [invalid, setInvalid] = useState(false);
+
+  const handleUsernameChange = ({ target }) => {
+    setInvalid(false);
+    setUsername(target.value);
+  };
+
+  const handlePasswordChange = ({ target }) => {
+    setInvalid(false);
+    setPassword(target.value);
+  };
 
   const doLogin = async (event) => {
     event.preventDefault();
@@ -16,6 +27,7 @@ const LoginPage = ({ handleLogin }) => {
       setUsername("");
       setPassword("");
     } catch (error) {
+      setInvalid(true);
       console.log(error);
     }
   };
@@ -33,7 +45,8 @@ const LoginPage = ({ handleLogin }) => {
                 type="text"
                 placeholder="Enter username"
                 value={username}
-                onChange={({ target }) => setUsername(target.value)}
+                onChange={handleUsernameChange}
+                isInvalid={invalid}
               />
             </Form.Group>
 
@@ -44,7 +57,8 @@ const LoginPage = ({ handleLogin }) => {
                 type="password"
                 placeholder="Password"
                 value={password}
-                onChange={({ target }) => setPassword(target.value)}
+                onChange={handlePasswordChange}
+                isInvalid={invalid}
               />
             </Form.Group>
 

@@ -27,19 +27,16 @@ function App() {
       const userData = JSON.parse(loggedInUser);
       setUser(userData);
       postsService.setToken(userData.token);
+      commentService.setToken(userData.token);
     }
   }, []);
 
   const handleLogin = async (credentials) => {
-    try {
-      const userData = await loginService.login(credentials);
-      setUser(userData);
-      postsService.setToken(userData.token);
-      commentService.setToken(userData.token);
-      window.localStorage.setItem("loggedInUser", JSON.stringify(userData));
-    } catch (error) {
-      console.log(error);
-    }
+    const userData = await loginService.login(credentials);
+    setUser(userData);
+    postsService.setToken(userData.token);
+    commentService.setToken(userData.token);
+    window.localStorage.setItem("loggedInUser", JSON.stringify(userData));
   };
 
   const incrementLikeOf = async (postId) => {

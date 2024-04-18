@@ -13,12 +13,8 @@ const LoginOrSignUp = ({ handleLogin }) => {
   };
 
   const handleSignUp = async (userObj) => {
-    try {
-      await userService.createUser(userObj);
-      toggleForm();
-    } catch (error) {
-      console.log(error);
-    }
+    await userService.createUser(userObj);
+    toggleForm();
   };
 
   const buttonVariant = signedUp ? "primary" : "secondary";
