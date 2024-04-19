@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Container } from "@mui/material";
 
 import Feed from "./components/Feed";
-import PostForm from "./components/PostForm";
+import PostFormMUI from "./components/PostFormMUI";
 import LoginOrSignUp from "./components/LoginOrSignUp";
 
 import postsService from "./services/posts";
@@ -55,12 +55,14 @@ function App() {
   };
 
   const createPost = async (postToAdd) => {
-    try {
-      const newPost = await postsService.create(postToAdd);
-      setPosts(posts.concat(newPost));
-    } catch (error) {
-      console.log(error);
-    }
+    const newPost = await postsService.create(postToAdd);
+    setPosts(posts.concat(newPost));
+    // try {
+    //   const newPost = await postsService.create(postToAdd);
+    //   setPosts(posts.concat(newPost));
+    // } catch (error) {
+    //   console.log(error);
+    // }
   };
 
   const createComment = async (commentToAdd) => {
@@ -86,7 +88,7 @@ function App() {
         <LoginOrSignUp handleLogin={handleLogin} />
       ) : (
         <>
-          <PostForm createPost={createPost} />
+          <PostFormMUI createPost={createPost} />
           <Feed
             posts={posts}
             incrementLikeOf={incrementLikeOf}

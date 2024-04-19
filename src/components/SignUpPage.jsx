@@ -9,7 +9,7 @@ import {
   CardActions,
   Avatar,
 } from "@mui/material";
-import PhotoCamera from "@mui/icons-material/PhotoCamera";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
 const SignUpPage = ({ handleSignUp }) => {
   const [username, setUsername] = useState("");
@@ -118,7 +118,7 @@ const SignUpPage = ({ handleSignUp }) => {
                 variant="contained"
                 color="primary"
                 component="span"
-                startIcon={<PhotoCamera />}
+                startIcon={<CloudUploadIcon />}
                 fullWidth
               >
                 Upload Avatar
