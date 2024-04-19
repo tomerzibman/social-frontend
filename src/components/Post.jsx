@@ -27,8 +27,12 @@ const Post = ({
         onLike={incrementLike}
       />
       <Divider />
-      <CommentList comments={comments} />
-      <Divider />
+      {comments.length > 0 && (
+        <>
+          <CommentList comments={comments} />
+          <Divider />
+        </>
+      )}
       <CommentForm createComment={createComment} postId={id} />
     </Card>
   );

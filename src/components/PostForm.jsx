@@ -1,63 +1,110 @@
 import { useState } from "react";
-import { Form, Button } from "react-bootstrap";
+import {
+  Box,
+  Button,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Typography,
+} from "@mui/material";
 
-const PostForm = ({ createPost }) => {
+const PostFormMUI = ({ createPost }) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [showForm, setShowForm] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
-  const buttonLabel = showForm ? "Hide form" : "Show form";
+  const handleTitleChange = ({ target }) => {
+    setTitle(target.value);
+    setHasError(false);
+  };
 
-  const toggleVisibility = () => {
-    setShowForm(!showForm);
+  const handleContentChange = ({ target }) => {
+    setContent(target.value);
+    setHasError(false);
   };
 
   const addPost = async (event) => {
     event.preventDefault();
+
+    if (!title || !content) {
+      setHasError(true);
+      return;
+    }
+
     const postObject = {
       title,
       content,
     };
-    await createPost(postObject);
-    setTitle("");
-    setContent("");
-    setShowForm(false);
+    try {
+      await createPost(postObject);
+      setTitle("");
+      setContent("");
+      setOpen(false);
+    } catch (error) {
+      setHasError(true);
+      console.log(error);
+    }
   };
 
   return (
     <div>
-      {showForm && (
-        <div>
-          <Form onSubmit={addPost}>
-            <Form.Group controlId="postTitle">
-              <Form.Control
-                type="text"
-                value={title}
-                onChange={({ target }) => setTitle(target.value)}
-                placeholder="Title"
-                className="mt-5 mb-2"
-              />
-            </Form.Group>
-            <Form.Group controlId="postContent">
-              <Form.Control
-                as="textarea"
-                value={content}
-                onChange={({ target }) => setContent(target.value)}
-                placeholder="What's on your mind?"
-                className="mb-2"
-              />
-            </Form.Group>
-            <Button variant="primary" type="submit">
-              Create Post
-            </Button>
-          </Form>
-        </div>
-      )}
-      <Button onClick={toggleVisibility} className="mt-2">
-        {buttonLabel}
-      </Button>
+      <Box display="flex" justifyContent="center" my={2}>
+        <Button
+          variant="outlined"
+          color="primary"
+          onClick={() => setOpen(true)}
+        >
+          Create Post
+        </Button>
+      </Box>
+      <Dialog open={open} onClose={() => setOpen(false)}>
+        <DialogTitle>Create New Post</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="title"
+            label="Title"
+            type="text"
+            fullWidth
+            value={title}
+            onChange={handleTitleChange}
+          />
+          <TextField
+            margin="dense"
+            id="content"
+            label="Content"
+            multiline
+            rows={4}
+            fullWidth
+            value={content}
+            onChange={handleContentChange}
+          />
+          {hasError && (
+            <Typography
+              variant="body2"
+              color="error"
+              align="center"
+              gutterBottom
+            >
+              title and content are required
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpen(false)} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={addPost} color="primary">
+            Create
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
 
-export default PostForm;
+export default PostFormMUI;

@@ -5,9 +5,7 @@ const PostContent = ({ title, content }) => (
     <Typography variant="h6" gutterBottom>
       {title}
     </Typography>
-    <Typography variant="body2" color="text.secondary">
-      {content}
-    </Typography>
+    <Typography variant="body2">{content}</Typography>
   </CardContent>
 );
 

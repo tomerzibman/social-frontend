@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Container } from "@mui/material";
 
 import Feed from "./components/Feed";
-import PostFormMUI from "./components/PostFormMUI";
+import PostForm from "./components/PostForm";
 import LoginOrSignUp from "./components/LoginOrSignUp";
 
 import postsService from "./services/posts";
@@ -88,7 +88,7 @@ function App() {
         <LoginOrSignUp handleLogin={handleLogin} />
       ) : (
         <>
-          <PostFormMUI createPost={createPost} />
+          <PostForm createPost={createPost} />
           <Feed
             posts={posts}
             incrementLikeOf={incrementLikeOf}
