@@ -16,9 +16,12 @@ function App() {
   const loggedIn = user != null;
 
   useEffect(() => {
-    postsService.getAll().then((firstPosts) => {
-      setPosts(firstPosts);
-    });
+    postsService
+      .getAll()
+      .then((firstPosts) => {
+        setPosts(firstPosts);
+      })
+      .catch((error) => console.log(error));
   }, []);
 
   useEffect(() => {
@@ -57,12 +60,6 @@ function App() {
   const createPost = async (postToAdd) => {
     const newPost = await postsService.create(postToAdd);
     setPosts(posts.concat(newPost));
-    // try {
-    //   const newPost = await postsService.create(postToAdd);
-    //   setPosts(posts.concat(newPost));
-    // } catch (error) {
-    //   console.log(error);
-    // }
   };
 
   const createComment = async (commentToAdd) => {
