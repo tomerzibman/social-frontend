@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Container } from "react-bootstrap";
+import { Container } from "@mui/material";
 
 import Feed from "./components/Feed";
 import PostForm from "./components/PostForm";

@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { Form, Button, Container, Row, Col } from "react-bootstrap";
+import {
+  Button,
+  Container,
+  TextField,
+  Typography,
+  Card,
+  CardContent,
+  CardActions,
+} from "@mui/material";
 
 const LoginPage = ({ handleLogin }) => {
   const [username, setUsername] = useState("");
@@ -33,41 +41,50 @@ const LoginPage = ({ handleLogin }) => {
   };
 
   return (
-    <Container>
-      <Row className="justify-content-center mt-5">
-        <Col md={6}>
-          <h2>Login</h2>
-          <Form onSubmit={doLogin}>
-            <Form.Group controlId="formBasicUsername">
-              <Form.Label className="mb-0">Username</Form.Label>
-              <Form.Control
-                className="mb-3"
-                type="text"
-                placeholder="Enter username"
-                value={username}
-                onChange={handleUsernameChange}
-                isInvalid={invalid}
-              />
-            </Form.Group>
-
-            <Form.Group controlId="formBasicPassword">
-              <Form.Label className="mb-0">Password</Form.Label>
-              <Form.Control
-                className="mb-3"
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={handlePasswordChange}
-                isInvalid={invalid}
-              />
-            </Form.Group>
-
-            <Button variant="primary" type="submit">
-              Login
-            </Button>
-          </Form>
-        </Col>
-      </Row>
+    <Container component="main" maxWidth="xs" style={{ marginTop: "5vh" }}>
+      <Card variant="outlined">
+        <CardContent>
+          <Typography variant="h5" component="h2" align="center" gutterBottom>
+            Login
+          </Typography>
+          <form onSubmit={doLogin}>
+            <TextField
+              variant="outlined"
+              margin="normal"
+              fullWidth
+              label="Username"
+              value={username}
+              onChange={handleUsernameChange}
+              required
+            />
+            <TextField
+              variant="outlined"
+              margin="normal"
+              fullWidth
+              label="Password"
+              type="password"
+              value={password}
+              onChange={handlePasswordChange}
+              required
+            />
+            {invalid && (
+              <Typography
+                variant="body2"
+                color="error"
+                align="center"
+                gutterBottom
+              >
+                username or password incorrect
+              </Typography>
+            )}
+            <CardActions style={{ justifyContent: "center" }}>
+              <Button type="submit" variant="contained" color="primary">
+                Login
+              </Button>
+            </CardActions>
+          </form>
+        </CardContent>
+      </Card>
     </Container>
   );
 };

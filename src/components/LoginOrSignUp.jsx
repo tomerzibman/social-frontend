@@ -1,46 +1,34 @@
 import { useState } from "react";
-import { Button, Container, Row, Col } from "react-bootstrap";
+import { Box, Button, Container } from "@mui/material";
 import LoginPage from "./LoginPage";
 import SignUpPage from "./SignUpPage";
 
 import userService from "../services/user";
 
 const LoginOrSignUp = ({ handleLogin }) => {
-  const [signedUp, setSignedUp] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
 
-  const toggleForm = () => {
-    setSignedUp(!signedUp);
+  const toggleAuth = () => {
+    setIsLogin(!isLogin);
   };
 
   const handleSignUp = async (userObj) => {
     await userService.createUser(userObj);
-    toggleForm();
+    toggleAuth();
   };
 
-  const buttonVariant = signedUp ? "primary" : "secondary";
-  const buttonLabel = signedUp ? "Go to sign up" : "Go to log in";
-
   return (
-    <Container>
-      <Row className="justify-content-center mt-5">
-        <Col md={6}>
-          {!signedUp ? (
-            <SignUpPage handleSignUp={handleSignUp} />
-          ) : (
-            <LoginPage handleLogin={handleLogin} />
-          )}
-
-          <div className="mt-3 text-center">
-            <Button
-              variant={buttonVariant}
-              onClick={toggleForm}
-              className="justify-content-left"
-            >
-              {buttonLabel}
-            </Button>
-          </div>
-        </Col>
-      </Row>
+    <Container component="main" maxWidth="xs" style={{ marginTop: "5vh" }}>
+      {isLogin ? (
+        <LoginPage handleLogin={handleLogin} />
+      ) : (
+        <SignUpPage handleSignUp={handleSignUp} />
+      )}
+      <Box display="flex" justifyContent="center" marginTop="1rem">
+        <Button onClick={toggleAuth} color="primary">
+          {isLogin ? "Switch to Signup" : "Switch to Login"}
+        </Button>
+      </Box>
     </Container>
   );
 };
