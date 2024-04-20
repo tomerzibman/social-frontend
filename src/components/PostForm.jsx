@@ -10,7 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 
-const PostFormMUI = ({ createPost }) => {
+const PostForm = ({ createPost }) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [open, setOpen] = useState(false);
@@ -107,4 +107,4 @@ const PostFormMUI = ({ createPost }) => {
   );
 };
 
-export default PostFormMUI;
+export default PostForm;

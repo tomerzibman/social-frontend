@@ -11,6 +11,8 @@ import {
 } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
+import Notification from "./Notification";
+
 const SignUpPage = ({ handleSignUp }) => {
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
@@ -22,6 +24,7 @@ const SignUpPage = ({ handleSignUp }) => {
   const [nameError, setNameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [showError, setShowError] = useState(false);
 
   const checkUsername = (text) => {
     if (!text) {
@@ -109,6 +112,13 @@ const SignUpPage = ({ handleSignUp }) => {
     }
   };
 
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setShowError(false);
+  };
+
   const doSignUp = async (event) => {
     event.preventDefault();
     const valid =
@@ -117,6 +127,7 @@ const SignUpPage = ({ handleSignUp }) => {
       checkPassword(password) &
       checkConfirmPassword(confirmPassword);
     if (!valid) {
+      setShowError(true);
       console.log("we have errors");
       return;
     }
@@ -235,6 +246,12 @@ const SignUpPage = ({ handleSignUp }) => {
           </form>
         </CardContent>
       </Card>
+      <Notification
+        varient="error"
+        message="Signup failed, invalid input"
+        open={showError}
+        handleClose={handleClose}
+      />
     </Container>
   );
 };

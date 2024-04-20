@@ -5,15 +5,26 @@ import SignUpPage from "./SignUpPage";
 
 import userService from "../services/user";
 
+import Notification from "./Notification";
+
 const LoginOrSignUp = ({ handleLogin }) => {
   const [isLogin, setIsLogin] = useState(true);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const toggleAuth = () => {
     setIsLogin(!isLogin);
   };
 
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setShowSuccess(false);
+  };
+
   const handleSignUp = async (userObj) => {
     await userService.createUser(userObj);
+    setShowSuccess(true);
     toggleAuth();
   };
 
@@ -29,6 +40,12 @@ const LoginOrSignUp = ({ handleLogin }) => {
           {isLogin ? "Switch to Signup" : "Switch to Login"}
         </Button>
       </Box>
+      <Notification
+        varient="success"
+        message="Account created successfully! Please login now."
+        open={showSuccess}
+        handleClose={handleClose}
+      />
     </Container>
   );
 };

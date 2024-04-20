@@ -1,4 +1,4 @@
-import { Avatar, CardHeader } from "@mui/material";
+import { Avatar, CardHeader, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
@@ -14,7 +14,11 @@ const PostHeader = ({ username, date, photo }) => {
           src={photo || "http://localhost:3000/images/default.jpg"}
         />
       }
-      title={username}
+      title={
+        <Typography variant="subtitle2" color="textPrimary">
+          {username}
+        </Typography>
+      }
       subheader={displayDate}
     />
   );

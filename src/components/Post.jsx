@@ -16,6 +16,7 @@ const Post = ({
   incrementLike,
   createComment,
   photo,
+  loggedIn,
 }) => {
   return (
     <Card sx={{ maxWidth: 600, margin: "auto", marginBottom: 2 }}>
@@ -25,6 +26,7 @@ const Post = ({
         likes={likes}
         commentsCount={comments.length}
         onLike={incrementLike}
+        loggedIn={loggedIn}
       />
       <Divider />
       {comments.length > 0 && (
@@ -33,7 +35,11 @@ const Post = ({
           <Divider />
         </>
       )}
-      <CommentForm createComment={createComment} postId={id} />
+      <CommentForm
+        createComment={createComment}
+        postId={id}
+        loggedIn={loggedIn}
+      />
     </Card>
   );
 };

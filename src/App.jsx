@@ -1,13 +1,17 @@
 import { useState, useEffect } from "react";
 import { Container } from "@mui/material";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Feed from "./components/Feed";
 import PostForm from "./components/PostForm";
 import LoginOrSignUp from "./components/LoginOrSignUp";
+import SearchAppBar from "./components/SearchAppBar";
 
 import postsService from "./services/posts";
 import loginService from "./services/login";
 import commentService from "./services/comments";
+import UserProfile from "./components/UserProfile";
+import UserSearchResults from "./components/UserSearchResults";
 
 function App() {
   const [posts, setPosts] = useState([]);
@@ -46,15 +50,21 @@ function App() {
     const post = posts.find((post) => post.id == postId);
     const updatedPost = { ...post, likes: post.likes + 1 };
 
-    try {
-      const likedPost = await postsService.update(updatedPost, postId);
-      const updatedPosts = posts.map((post) =>
-        post.id == postId ? likedPost : post
-      );
-      setPosts(updatedPosts);
-    } catch (error) {
-      console.log(error);
-    }
+    const likedPost = await postsService.update(updatedPost, postId);
+    const updatedPosts = posts.map((post) =>
+      post.id == postId ? likedPost : post
+    );
+    setPosts(updatedPosts);
+
+    // try {
+    //   const likedPost = await postsService.update(updatedPost, postId);
+    //   const updatedPosts = posts.map((post) =>
+    //     post.id == postId ? likedPost : post
+    //   );
+    //   setPosts(updatedPosts);
+    // } catch (error) {
+    //   console.log(error);
+    // }
   };
 
   const createPost = async (postToAdd) => {
@@ -81,18 +91,55 @@ function App() {
 
   return (
     <Container>
-      {!loggedIn ? (
-        <LoginOrSignUp handleLogin={handleLogin} />
-      ) : (
-        <>
-          <PostForm createPost={createPost} />
-          <Feed
-            posts={posts}
-            incrementLikeOf={incrementLikeOf}
-            createComment={createComment}
+      <Router>
+        <SearchAppBar
+          loggedIn={loggedIn}
+          photo={user && user.photo ? user.photo : null}
+        />
+        <Routes>
+          <Route
+            path="/login"
+            element={<LoginOrSignUp handleLogin={handleLogin} />}
           />
-        </>
-      )}
+          <Route
+            path="/"
+            element={
+              <>
+                {loggedIn && <PostForm createPost={createPost} />}{" "}
+                <Feed
+                  posts={posts}
+                  incrementLikeOf={incrementLikeOf}
+                  createComment={createComment}
+                  loggedIn={loggedIn}
+                />
+              </>
+            }
+          />
+          <Route path="/users" element={<UserSearchResults />} />
+          <Route
+            path="/user/:id"
+            element={
+              <UserProfile
+                incrementLikeOf={incrementLikeOf}
+                createComment={createComment}
+                loggedIn={loggedIn}
+              />
+            }
+          />
+        </Routes>
+        {/* {!loggedIn ? (
+          <LoginOrSignUp handleLogin={handleLogin} />
+        ) : (
+          <>
+            <PostForm createPost={createPost} />
+            <Feed
+              posts={posts}
+              incrementLikeOf={incrementLikeOf}
+              createComment={createComment}
+            />
+          </>
+        )} */}
+      </Router>
     </Container>
   );
 }

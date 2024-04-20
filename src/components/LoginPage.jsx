@@ -8,11 +8,16 @@ import {
   CardContent,
   CardActions,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+
+import Notification from "./Notification";
 
 const LoginPage = ({ handleLogin }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [invalid, setInvalid] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const navigate = useNavigate();
 
   const handleUsernameChange = ({ target }) => {
     setInvalid(false);
@@ -22,6 +27,13 @@ const LoginPage = ({ handleLogin }) => {
   const handlePasswordChange = ({ target }) => {
     setInvalid(false);
     setPassword(target.value);
+  };
+
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setShowError(false);
   };
 
   const doLogin = async (event) => {
@@ -34,8 +46,10 @@ const LoginPage = ({ handleLogin }) => {
       await handleLogin(credentials);
       setUsername("");
       setPassword("");
+      navigate("/");
     } catch (error) {
       setInvalid(true);
+      setShowError(true);
       console.log(error);
     }
   };
@@ -85,6 +99,12 @@ const LoginPage = ({ handleLogin }) => {
           </form>
         </CardContent>
       </Card>
+      <Notification
+        varient="error"
+        message="Failed to login, unaithorized"
+        open={showError}
+        handleClose={handleClose}
+      />
     </Container>
   );
 };
