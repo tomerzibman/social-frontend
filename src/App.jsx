@@ -123,6 +123,7 @@ function App() {
                 incrementLikeOf={incrementLikeOf}
                 createComment={createComment}
                 loggedIn={loggedIn}
+                curUserId={user !== null ? user.id : null}
               />
             }
           />
