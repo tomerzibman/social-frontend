@@ -2,6 +2,12 @@ import axios from "axios";
 
 const baseUrl = "http://localhost:3000/api/users";
 
+let token = null;
+
+const setToken = (newToken) => {
+  token = `Bearer ${newToken}`;
+};
+
 const getUsers = async () => {
   const response = await axios.get(baseUrl);
   return response.data;
@@ -28,4 +34,23 @@ const createUser = async (userObject) => {
   return response.data;
 };
 
-export default { getUsers, getUserById, getUsersByUsername, createUser };
+const updateUser = async (userObject, userId) => {
+  const config = {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      Authorization: token,
+    },
+  };
+
+  const response = await axios.put(`${baseUrl}/${userId}`, userObject, config);
+  return response.data;
+};
+
+export default {
+  setToken,
+  getUsers,
+  getUserById,
+  getUsersByUsername,
+  createUser,
+  updateUser,
+};

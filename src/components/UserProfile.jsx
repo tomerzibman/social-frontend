@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import {
   CircularProgress,
@@ -8,12 +8,15 @@ import {
   Divider,
   IconButton,
   TextField,
+  Button,
   Box,
+  Stack,
 } from "@mui/material";
 import Feed from "./Feed";
+import Notification from "./Notification";
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
-// import SaveIcon from "@mui/icons-material/Save";
+import SaveIcon from "@mui/icons-material/Save";
 import userService from "../services/user";
 
 const UserProfile = ({
@@ -21,12 +24,26 @@ const UserProfile = ({
   createComment,
   loggedIn,
   curUserId,
+  updateUser,
 }) => {
   const [user, setUser] = useState(null);
   const [isEditName, setIsEditName] = useState(false);
   const [isEditUsername, setIsEditUsername] = useState(false);
   const [nameEdit, setNameEdit] = useState("");
   const [usernameEdit, setUsernameEdit] = useState("");
+  const [photoEdit, setPhotoEdit] = useState("");
+  const [preview, setPreview] = useState(null);
+  const [notify, setNotify] = useState(false);
+  const [notificationData, setNotificationData] = useState({});
+
+  const fileInputRef = useRef(null);
+
+  const handleAvatarClick = () => {
+    if (!allowedToEdit) {
+      return;
+    }
+    fileInputRef.current.click();
+  };
 
   const id = useParams().id;
   const allowedToEdit = loggedIn && curUserId !== null && curUserId == id;
@@ -38,6 +55,7 @@ const UserProfile = ({
         setUser(foundUser);
         setNameEdit(foundUser.name);
         setUsernameEdit(foundUser.username);
+        setPhotoEdit(foundUser.photo);
       })
       .catch((error) => {
         console.log(error);
@@ -46,37 +64,130 @@ const UserProfile = ({
 
   const handleEditName = () => {
     setIsEditName(!isEditName);
+    setNameEdit(user.name);
   };
 
   const handleEditUsername = () => {
     setIsEditUsername(!isEditUsername);
+    setUsernameEdit(user.username);
   };
 
-  // const handleSaveName = () => {
-  //   // Call API to update the name
-  //   userService.updateUserName(id, name).then(() => {
-  //     setIsEditName(false);
-  //   });
-  // };
+  const handleDiscardPhoto = () => {
+    setPreview(null);
+    setPhotoEdit(user.photo);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = null;
+    }
+  };
 
-  // const handleSaveUsername = () => {
-  //   // Call API to update the username
-  //   userService.updateUserUsername(id, usernameEdit).then(() => {
-  //     setIsEditUsername(false);
-  //   });
-  // };
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+
+    if (file) {
+      const reader = new FileReader();
+
+      reader.onloadend = () => {
+        setPhotoEdit(file);
+        setPreview(reader.result);
+      };
+
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setNotify(false);
+  };
+
+  const handleSaveChanges = async () => {
+    const formData = new FormData();
+    if (usernameEdit !== user.username) {
+      formData.append("username", usernameEdit);
+    }
+    if (nameEdit !== user.name) {
+      formData.append("name", nameEdit);
+    }
+    if (photoEdit !== null) {
+      formData.append("photo", photoEdit);
+    }
+
+    try {
+      const updatedUser = await updateUser(formData);
+      setIsEditName(false);
+      setIsEditUsername(false);
+      setPhotoEdit("");
+      setPreview(null);
+      setUser(updatedUser);
+      setNotificationData({
+        varient: "success",
+        message: "Successfully updated your information!",
+      });
+      setNotify(true);
+    } catch (error) {
+      setNotificationData({
+        varient: "error",
+        message: "An error occured while updating your information.",
+      });
+      setNotify(true);
+      console.log(error);
+    }
+  };
 
   if (!user) {
-    return <CircularProgress disableShrink />;
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+      >
+        <CircularProgress disableShrink />
+      </Box>
+    );
   }
 
   return (
     <Container maxWidth="md" sx={{ marginTop: 4 }}>
-      <Avatar
-        alt={user.name}
-        src={user.photo}
-        sx={{ width: 100, height: 100, margin: "0 auto" }}
-      />
+      <Stack direction="row" sx={{ justifyContent: "center" }}>
+        <input
+          accept="image/*"
+          id="avatar-upload"
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          style={{ display: "none" }}
+          disabled={!allowedToEdit}
+        />
+        <label htmlFor="avatar-upload">
+          <IconButton
+            sx={{
+              display: "flex",
+              marginLeft: "auto",
+              marginRight: "auto",
+            }}
+            disabled={!allowedToEdit}
+            onClick={handleAvatarClick}
+          >
+            <Avatar
+              src={preview || user.photo}
+              alt={preview !== null ? "Avatar Preview" : user.name}
+              sx={{ width: 100, height: 100 }}
+            />
+          </IconButton>
+        </label>
+        {preview && (
+          <IconButton
+            onClick={handleDiscardPhoto}
+            sx={{ marginTop: "auto", marginBottom: "auto" }}
+          >
+            <CloseIcon />
+          </IconButton>
+        )}
+      </Stack>
+
       <Box
         sx={{
           display: "flex",
@@ -95,20 +206,19 @@ const UserProfile = ({
             )}
           </Typography>
         ) : (
-          <>
+          <Stack direction="row">
             <TextField
               size="small"
               variant="outlined"
               value={nameEdit}
               onChange={({ target }) => setNameEdit(target.value)}
-              //onBlur={handleSaveName}
               autoFocus
               style={{ marginBottom: "10px" }}
             />
             <IconButton onClick={handleEditName} size="small">
               <CloseIcon />
             </IconButton>
-          </>
+          </Stack>
         )}
         {!isEditUsername ? (
           <Typography variant="h6" color="textSecondary" gutterBottom>
@@ -120,26 +230,30 @@ const UserProfile = ({
             )}
           </Typography>
         ) : (
-          <>
+          <Stack direction="row">
             <TextField
               size="small"
               variant="outlined"
               value={usernameEdit}
               onChange={({ target }) => setUsernameEdit(target.value)}
-              //onBlur={handleSaveUsername}
               autoFocus
             />
             <IconButton onClick={handleEditUsername} size="small">
               <CloseIcon />
             </IconButton>
-          </>
+          </Stack>
+        )}
+        {(isEditName || isEditUsername || preview !== null) && (
+          <Button onClick={handleSaveChanges}>
+            <SaveIcon /> Save Changes
+          </Button>
         )}
       </Box>
 
       <Divider sx={{ marginTop: 4, marginBottom: 2 }} />
 
       <Typography variant="h5" align="center" gutterBottom>
-        {`${user.name}'s Posts`}
+        {allowedToEdit ? "Your Posts" : `${user.name}'s Posts`}
       </Typography>
 
       <Feed
@@ -147,6 +261,12 @@ const UserProfile = ({
         incrementLikeOf={incrementLikeOf}
         createComment={createComment}
         loggedIn={loggedIn}
+      />
+      <Notification
+        varient={notificationData.varient}
+        message={notificationData.message}
+        open={notify}
+        handleClose={handleClose}
       />
     </Container>
   );

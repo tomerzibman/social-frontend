@@ -9,6 +9,7 @@ import SearchAppBar from "./components/SearchAppBar";
 
 import postsService from "./services/posts";
 import loginService from "./services/login";
+import userService from "./services/user";
 import commentService from "./services/comments";
 import UserProfile from "./components/UserProfile";
 import UserSearchResults from "./components/UserSearchResults";
@@ -35,6 +36,7 @@ function App() {
       setUser(userData);
       postsService.setToken(userData.token);
       commentService.setToken(userData.token);
+      userService.setToken(userData.token);
     }
   }, []);
 
@@ -43,6 +45,7 @@ function App() {
     setUser(userData);
     postsService.setToken(userData.token);
     commentService.setToken(userData.token);
+    userService.setToken(userData.token);
     window.localStorage.setItem("loggedInUser", JSON.stringify(userData));
   };
 
@@ -89,6 +92,22 @@ function App() {
     }
   };
 
+  const updateUser = async (userObject) => {
+    const updatedUserData = await userService.updateUser(userObject, user.id);
+    const updatedLoggedInUser = {
+      ...user,
+      username: updatedUserData.username,
+      name: updatedUserData.name,
+      photo: updatedUserData.photo,
+    };
+    setUser(updatedLoggedInUser);
+    window.localStorage.setItem(
+      "loggedInUser",
+      JSON.stringify(updatedLoggedInUser)
+    );
+    return updatedUserData;
+  };
+
   return (
     <Container>
       <Router>
@@ -124,6 +143,7 @@ function App() {
                 createComment={createComment}
                 loggedIn={loggedIn}
                 curUserId={user !== null ? user.id : null}
+                updateUser={updateUser}
               />
             }
           />
