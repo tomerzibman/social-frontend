@@ -7,6 +7,7 @@ import PostForm from "./components/PostForm";
 import LoginOrSignUp from "./components/LoginOrSignUp";
 import SearchAppBar from "./components/SearchAppBar";
 import Loading from "./components/Loading";
+import Conversations from "./components/Conversations";
 
 import postsService from "./services/posts";
 import loginService from "./services/login";
@@ -59,6 +60,7 @@ function App() {
       post.id == postId ? likedPost : post
     );
     setPosts(updatedPosts);
+    return likedPost;
 
     // try {
     //   const likedPost = await postsService.update(updatedPost, postId);
@@ -158,6 +160,7 @@ function App() {
               />
             }
           />
+          <Route path="/conversations" element={<Conversations />} />
         </Routes>
         {/* {!loggedIn ? (
           <LoginOrSignUp handleLogin={handleLogin} />

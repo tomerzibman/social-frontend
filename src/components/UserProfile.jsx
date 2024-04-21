@@ -27,6 +27,7 @@ const UserProfile = ({
   updateUser,
 }) => {
   const [user, setUser] = useState(null);
+  const [userPosts, setUserPosts] = useState([]);
   const [isEditName, setIsEditName] = useState(false);
   const [isEditUsername, setIsEditUsername] = useState(false);
   const [nameEdit, setNameEdit] = useState("");
@@ -56,6 +57,7 @@ const UserProfile = ({
         setNameEdit(foundUser.name);
         setUsernameEdit(foundUser.username);
         setPhotoEdit(foundUser.photo);
+        setUserPosts(foundUser.posts);
       })
       .catch((error) => {
         console.log(error);
@@ -102,6 +104,14 @@ const UserProfile = ({
     setNotify(false);
   };
 
+  const handleLikePost = async (postId) => {
+    const likedPost = await incrementLikeOf(postId);
+    const updatedUserPosts = userPosts.map((up) =>
+      up.id === likedPost.id ? likedPost : up
+    );
+    setUserPosts(updatedUserPosts);
+  };
+
   const handleSaveChanges = async () => {
     const formData = new FormData();
     if (usernameEdit !== user.username) {
@@ -121,6 +131,7 @@ const UserProfile = ({
       setPhotoEdit("");
       setPreview(null);
       setUser(updatedUser);
+      setUserPosts(updatedUser.posts);
       setNotificationData({
         varient: "success",
         message: "Successfully updated your information!",
@@ -257,8 +268,8 @@ const UserProfile = ({
       </Typography>
 
       <Feed
-        posts={user.posts}
-        incrementLikeOf={incrementLikeOf}
+        posts={userPosts}
+        incrementLikeOf={handleLikePost}
         createComment={createComment}
         loggedIn={loggedIn}
       />
