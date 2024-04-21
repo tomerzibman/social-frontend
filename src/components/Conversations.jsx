@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
+  Box,
   Grid,
   Paper,
   List,
@@ -9,111 +10,65 @@ import {
   TextField,
   Button,
   Divider,
+  Avatar,
+  Stack,
 } from "@mui/material";
+import SendIcon from "@mui/icons-material/Send";
+import MyMessage from "./MyMessage";
+import OtherMessage from "./OtherMessage";
+import conversationService from "../services/conversations";
+import messageService from "../services/messages";
+import io from "socket.io-client";
+const socket = io.connect("http://localhost:3000", {
+  transports: ["websocket"],
+});
 
-const MyMessage = ({ name, content }) => {
-  return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "flex-end",
-        marginBottom: "8px",
-      }}
-    >
-      <Paper
-        elevation={3}
-        square={false}
-        sx={{
-          maxWidth: "70%",
-          padding: "8px 12px",
-          backgroundColor: "#2196f3",
-          marginRight: "8px",
-        }}
-      >
-        <Typography
-          variant="subtitle2"
-          style={{ textAlign: "right", marginBottom: "4px", color: "white" }}
-        >
-          {name}
-        </Typography>
-        <Typography
-          variant="body1"
-          style={{ textAlign: "right", color: "white" }}
-        >
-          {content}
-        </Typography>
-      </Paper>
-    </div>
-  );
-};
-
-const OtherMessage = ({ name, content }) => {
-  return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "flex-start",
-        marginBottom: "8px",
-      }}
-    >
-      <Paper
-        elevation={3}
-        sx={{
-          maxWidth: "70%",
-          padding: "8px 12px",
-          backgroundColor: "#ffffff",
-          marginLeft: "8px",
-        }}
-      >
-        <Typography
-          variant="subtitle2"
-          style={{ textAlign: "left", marginBottom: "4px" }}
-        >
-          {name}
-        </Typography>
-        <Typography variant="body1" style={{ textAlign: "left" }}>
-          {content}
-        </Typography>
-      </Paper>
-    </div>
-  );
-};
-
-export { MyMessage, OtherMessage };
-
-const Conversations = () => {
+const Conversations = ({ userId }) => {
+  const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
+  const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState("");
 
-  const conversations = [
-    {
-      id: 1,
-      name: "Alice",
-      messages: [
-        { name: "Alice", content: "Hi" },
-        { name: "You", content: "Hello" },
-      ],
-    },
-    {
-      id: 2,
-      name: "Bob",
-      messages: [
-        { name: "Bob", content: "Hey" },
-        { name: "You", content: "How are you?" },
-      ],
-    },
-    {
-      id: 3,
-      name: "Claire",
-      messages: [
-        { name: "Claire", content: "Good morning" },
-        { name: "You", content: "Morning!" },
-      ],
-    },
-  ];
+  const messagesEndRef = useRef(null);
 
-  const handleConversationClick = (conversation) => {
+  useEffect(() => {
+    if (userId) {
+      conversationService.getConversationsForUser(userId).then((convos) => {
+        setConversations(convos);
+      });
+
+      socket.on("newMessage", (message) => {
+        setMessages((prevMessages) => [...prevMessages, message]);
+        setTimeout(scrollToBottom, 0);
+      });
+
+      socket.on("connect", () => {
+        console.log("Socket connected");
+      });
+
+      socket.on("disconnect", () => {
+        console.log("Socket disconnected");
+      });
+
+      return () => {
+        socket.disconnect();
+      };
+    }
+  }, [userId]);
+
+  const handleConversationClick = async (conversation) => {
     setSelectedConversation(conversation);
+    socket.emit("joinConversation", conversation.id);
+
+    try {
+      const curMessages = await messageService.getMessagesForConversation(
+        conversation.id
+      );
+      setMessages(curMessages);
+      setTimeout(scrollToBottom, 0);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleMessageChange = (e) => {
@@ -121,16 +76,22 @@ const Conversations = () => {
   };
 
   const handleMessageSubmit = () => {
-    if (selectedConversation) {
-      const updatedConversation = {
-        ...selectedConversation,
-        messages: [
-          ...selectedConversation.messages,
-          { name: "You", content: messageInput },
-        ],
-      };
-      setSelectedConversation(updatedConversation);
-      setMessageInput("");
+    if (!selectedConversation) {
+      return;
+    }
+    const messageData = {
+      conversation: selectedConversation.id,
+      sender: userId,
+      content: messageInput,
+    };
+
+    socket.emit("sendMessage", messageData);
+    setMessageInput("");
+  };
+
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -143,16 +104,25 @@ const Conversations = () => {
         <Paper elevation={3} sx={{ height: "100%", overflow: "auto" }}>
           <List>
             {conversations.map((conversation) => (
-              <>
-                <ListItem
-                  button
-                  key={conversation.id}
-                  onClick={() => handleConversationClick(conversation)}
-                >
-                  <ListItemText primary={conversation.name} />
-                </ListItem>
+              <ListItem
+                button
+                key={conversation.id}
+                onClick={() => handleConversationClick(conversation)}
+              >
+                <Avatar
+                  src={
+                    conversation.participants.find((p) => p.id !== userId).photo
+                  }
+                  sx={{ marginRight: 1 }}
+                />
+                <ListItemText
+                  primary={
+                    conversation.participants.find((p) => p.id !== userId)
+                      .username
+                  }
+                />
                 <Divider />
-              </>
+              </ListItem>
             ))}
           </List>
         </Paper>
@@ -161,58 +131,88 @@ const Conversations = () => {
       <Grid item xs={9}>
         <Paper
           elevation={3}
-          sx={{ height: "100%", display: "flex", flexDirection: "column" }}
+          sx={{
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+          }}
         >
-          <Typography variant="h6" sx={{ p: 2 }}>
-            {selectedConversation
-              ? selectedConversation.name
-              : "Select a conversation"}
-          </Typography>
+          <Stack direction="row" sx={{ p: 2 }}>
+            {selectedConversation && (
+              <Avatar
+                src={
+                  selectedConversation.participants.find((p) => p.id !== userId)
+                    .photo
+                }
+                sx={{ marginRight: 1 }}
+              />
+            )}
+            <Typography variant="h6">
+              {selectedConversation
+                ? selectedConversation.participants.find((p) => p.id !== userId)
+                    .username
+                : "Select a conversation"}
+            </Typography>
+          </Stack>
           <Divider sx={{ marginBottom: 2 }} />
-          <div style={{ flex: 1, overflow: "auto", padding: "0 16px" }}>
-            {selectedConversation?.messages.map((message, index) => {
-              if (message.name === "You") {
+          <Box
+            sx={{
+              flex: 1,
+              overflowY: "auto",
+              padding: "0 16px",
+              maxHeight: 600,
+              display: "flex",
+              flexDirection: "column",
+              scrollBehavior: "smooth",
+            }}
+          >
+            {messages.map((message) => {
+              if (message.sender.id === userId) {
                 return (
                   <MyMessage
-                    key={index}
-                    name={message.name}
+                    key={message.id}
+                    username={"You"}
                     content={message.content}
                   />
                 );
               } else {
                 return (
                   <OtherMessage
-                    key={index}
-                    name={message.name}
+                    key={message.id}
+                    username={message.sender.username}
                     content={message.content}
                   />
                 );
               }
             })}
-          </div>
-          <div style={{ padding: "16px", borderTop: "1px solid #e0e0e0" }}>
-            <Grid container spacing={2} alignItems="center">
-              <Grid item xs={10}>
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  placeholder="Type a message"
-                  value={messageInput}
-                  onChange={handleMessageChange}
-                />
+            <div ref={messagesEndRef} />
+          </Box>
+          {selectedConversation !== null && (
+            <Box sx={{ padding: "16px", borderTop: "1px solid #e0e0e0" }}>
+              <Grid container spacing={2} alignItems="center">
+                <Grid item xs={10}>
+                  <TextField
+                    fullWidth
+                    variant="outlined"
+                    placeholder="Type a message"
+                    value={messageInput}
+                    onChange={handleMessageChange}
+                  />
+                </Grid>
+                <Grid item xs={2}>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    onClick={handleMessageSubmit}
+                    disabled={messageInput.length == 0}
+                  >
+                    <SendIcon sx={{ marginRight: 0.5 }} /> Send
+                  </Button>
+                </Grid>
               </Grid>
-              <Grid item xs={2}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  onClick={handleMessageSubmit}
-                >
-                  Send
-                </Button>
-              </Grid>
-            </Grid>
-          </div>
+            </Box>
+          )}
         </Paper>
       </Grid>
     </Grid>

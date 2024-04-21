@@ -18,6 +18,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from "@mui/icons-material/Save";
 import userService from "../services/user";
+import conversationService from "../services/conversations";
 
 const UserProfile = ({
   incrementLikeOf,
@@ -110,6 +111,19 @@ const UserProfile = ({
       up.id === likedPost.id ? likedPost : up
     );
     setUserPosts(updatedUserPosts);
+  };
+
+  const handleCreateConversation = async () => {
+    if (curUserId === id) {
+      return;
+    }
+
+    try {
+      const convoObj = { participants: [curUserId, id] };
+      conversationService.createConversation(convoObj);
+    } catch (error) {
+      console.log("Error creating conversation", error);
+    }
   };
 
   const handleSaveChanges = async () => {
@@ -258,6 +272,9 @@ const UserProfile = ({
           <Button onClick={handleSaveChanges}>
             <SaveIcon /> Save Changes
           </Button>
+        )}
+        {loggedIn && curUserId !== id && (
+          <Button onClick={handleCreateConversation}>Messgae</Button>
         )}
       </Box>
 

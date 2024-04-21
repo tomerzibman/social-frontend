@@ -160,7 +160,10 @@ function App() {
               />
             }
           />
-          <Route path="/conversations" element={<Conversations />} />
+          <Route
+            path="/conversations"
+            element={<Conversations userId={user !== null ? user.id : null} />}
+          />
         </Routes>
         {/* {!loggedIn ? (
           <LoginOrSignUp handleLogin={handleLogin} />
