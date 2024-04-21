@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Fragment } from "react";
 import {
   Box,
   Grid,
@@ -16,30 +16,53 @@ import {
 import SendIcon from "@mui/icons-material/Send";
 import MyMessage from "./MyMessage";
 import OtherMessage from "./OtherMessage";
-import conversationService from "../services/conversations";
+// import conversationService from "../services/conversations";
 import messageService from "../services/messages";
 import io from "socket.io-client";
+import { useParams, Link } from "react-router-dom";
 const socket = io.connect("http://localhost:3000", {
   transports: ["websocket"],
 });
 
-const Conversations = ({ userId }) => {
-  const [conversations, setConversations] = useState([]);
+const Conversations = ({ userId, conversations }) => {
+  //const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState("");
 
   const messagesEndRef = useRef(null);
 
+  const { convoId } = useParams();
+
   useEffect(() => {
-    if (userId) {
-      conversationService.getConversationsForUser(userId).then((convos) => {
-        setConversations(convos);
-      });
+    //if (userId) {
+    if (conversations.length > 0 && convoId) {
+      //   conversationService.getConversationsForUser(userId).then((convos) => {
+      //     setConversations(convos);
+      //   });
+
+      const handleConversationClick = async (conversation) => {
+        setSelectedConversation(conversation);
+        socket.emit("joinConversation", conversation.id);
+
+        try {
+          const curMessages = await messageService.getMessagesForConversation(
+            conversation.id
+          );
+          setMessages(curMessages);
+          setTimeout(scrollToBottom, 50);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+
+      handleConversationClick(
+        conversations.find((convo) => convo.id == convoId)
+      );
 
       socket.on("newMessage", (message) => {
         setMessages((prevMessages) => [...prevMessages, message]);
-        setTimeout(scrollToBottom, 0);
+        setTimeout(scrollToBottom, 50);
       });
 
       socket.on("connect", () => {
@@ -54,22 +77,22 @@ const Conversations = ({ userId }) => {
         socket.disconnect();
       };
     }
-  }, [userId]);
+  }, [convoId, conversations]);
 
-  const handleConversationClick = async (conversation) => {
-    setSelectedConversation(conversation);
-    socket.emit("joinConversation", conversation.id);
+  //   const handleConversationClick = async (conversation) => {
+  //     setSelectedConversation(conversation);
+  //     socket.emit("joinConversation", conversation.id);
 
-    try {
-      const curMessages = await messageService.getMessagesForConversation(
-        conversation.id
-      );
-      setMessages(curMessages);
-      setTimeout(scrollToBottom, 0);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  //     try {
+  //       const curMessages = await messageService.getMessagesForConversation(
+  //         conversation.id
+  //       );
+  //       setMessages(curMessages);
+  //       setTimeout(scrollToBottom, 0);
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   };
 
   const handleMessageChange = (e) => {
     setMessageInput(e.target.value);
@@ -86,6 +109,7 @@ const Conversations = ({ userId }) => {
     };
 
     socket.emit("sendMessage", messageData);
+    setTimeout(scrollToBottom, 50);
     setMessageInput("");
   };
 
@@ -93,6 +117,62 @@ const Conversations = ({ userId }) => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
+  };
+
+  const renderMessages = () => {
+    console.log("rendering messages");
+    let prevDateStr = null;
+
+    return messages.map((message) => {
+      const curDate = new Date(message.createdAt);
+      const prevDate = prevDateStr !== null ? new Date(prevDateStr) : null;
+
+      let showDivider = false;
+      if (prevDate) {
+        const timeDifference = (curDate - prevDate) / (1000 * 60 * 60);
+        showDivider = timeDifference >= 1;
+      }
+      prevDateStr = message.createdAt;
+      return (
+        <Fragment key={message.id}>
+          {showDivider && (
+            <div className="divider">
+              {curDate.toLocaleDateString()} {curDate.toLocaleTimeString()}
+            </div>
+          )}
+          {message.sender.id === userId ? (
+            <MyMessage
+              key={message.id}
+              username={"You"}
+              content={message.content}
+            />
+          ) : (
+            <OtherMessage
+              key={message.id}
+              username={message.sender.username}
+              content={message.content}
+            />
+          )}
+        </Fragment>
+      );
+      //   if (message.sender.id === userId) {
+      //     return (
+      //       <MyMessage
+      //         key={message.id}
+      //         username={"You"}
+      //         content={message.content}
+      //       />
+      //     );
+      //   } else {
+      //     return (
+      //       <OtherMessage
+      //         key={message.id}
+      //         username={message.sender.username}
+      //         content={message.content}
+      //       />
+      //     );
+      //   }
+    });
   };
 
   return (
@@ -104,25 +184,30 @@ const Conversations = ({ userId }) => {
         <Paper elevation={3} sx={{ height: "100%", overflow: "auto" }}>
           <List>
             {conversations.map((conversation) => (
-              <ListItem
-                button
-                key={conversation.id}
-                onClick={() => handleConversationClick(conversation)}
-              >
-                <Avatar
-                  src={
-                    conversation.participants.find((p) => p.id !== userId).photo
-                  }
-                  sx={{ marginRight: 1 }}
-                />
-                <ListItemText
-                  primary={
-                    conversation.participants.find((p) => p.id !== userId)
-                      .username
-                  }
-                />
+              <Box key={conversation.id}>
+                <ListItem
+                  button
+                  key={conversation.id}
+                  //onClick={() => handleConversationClick(conversation)}
+                  component={Link}
+                  to={`/conversations/${conversation.id}`}
+                >
+                  <Avatar
+                    src={
+                      conversation.participants.find((p) => p.id !== userId)
+                        .photo
+                    }
+                    sx={{ marginRight: 1 }}
+                  />
+                  <ListItemText
+                    primary={
+                      conversation.participants.find((p) => p.id !== userId)
+                        .username
+                    }
+                  />
+                </ListItem>
                 <Divider />
-              </ListItem>
+              </Box>
             ))}
           </List>
         </Paper>
@@ -166,7 +251,7 @@ const Conversations = ({ userId }) => {
               scrollBehavior: "smooth",
             }}
           >
-            {messages.map((message) => {
+            {/* {messages.map((message) => {
               if (message.sender.id === userId) {
                 return (
                   <MyMessage
@@ -184,7 +269,8 @@ const Conversations = ({ userId }) => {
                   />
                 );
               }
-            })}
+            })} */}
+            {renderMessages()}
             <div ref={messagesEndRef} />
           </Box>
           {selectedConversation !== null && (

@@ -12,6 +12,7 @@ import Conversations from "./components/Conversations";
 import postsService from "./services/posts";
 import loginService from "./services/login";
 import userService from "./services/user";
+import conversationService from "./services/conversations";
 import commentService from "./services/comments";
 import UserProfile from "./components/UserProfile";
 import UserSearchResults from "./components/UserSearchResults";
@@ -19,6 +20,7 @@ import UserSearchResults from "./components/UserSearchResults";
 function App() {
   const [posts, setPosts] = useState([]);
   const [user, setUser] = useState(null);
+  const [conversations, setConversations] = useState([]);
 
   const loggedIn = user != null;
 
@@ -41,6 +43,14 @@ function App() {
       userService.setToken(userData.token);
     }
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      conversationService.getConversationsForUser(user.id).then((convos) => {
+        setConversations(convos);
+      });
+    }
+  }, [user]);
 
   const handleLogin = async (credentials) => {
     const userData = await loginService.login(credentials);
@@ -111,6 +121,12 @@ function App() {
     return updatedUserData;
   };
 
+  const createConversation = async (convoObj) => {
+    const newConvo = await conversationService.createConversation(convoObj);
+    setConversations((prevConvos) => [...prevConvos, newConvo]);
+    return newConvo;
+  };
+
   return (
     <Container>
       <Router>
@@ -157,12 +173,28 @@ function App() {
                 loggedIn={loggedIn}
                 curUserId={user !== null ? user.id : null}
                 updateUser={updateUser}
+                conversations={conversations}
+                createConversation={createConversation}
+              />
+            }
+          />
+          <Route
+            path="/conversations/:convoId"
+            element={
+              <Conversations
+                userId={user !== null ? user.id : null}
+                conversations={conversations}
               />
             }
           />
           <Route
             path="/conversations"
-            element={<Conversations userId={user !== null ? user.id : null} />}
+            element={
+              <Conversations
+                userId={user !== null ? user.id : null}
+                conversations={conversations}
+              />
+            }
           />
         </Routes>
         {/* {!loggedIn ? (

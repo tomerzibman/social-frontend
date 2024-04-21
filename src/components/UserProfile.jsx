@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   CircularProgress,
   Container,
@@ -18,7 +18,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from "@mui/icons-material/Save";
 import userService from "../services/user";
-import conversationService from "../services/conversations";
 
 const UserProfile = ({
   incrementLikeOf,
@@ -26,6 +25,8 @@ const UserProfile = ({
   loggedIn,
   curUserId,
   updateUser,
+  conversations,
+  createConversation,
 }) => {
   const [user, setUser] = useState(null);
   const [userPosts, setUserPosts] = useState([]);
@@ -39,6 +40,8 @@ const UserProfile = ({
   const [notificationData, setNotificationData] = useState({});
 
   const fileInputRef = useRef(null);
+
+  const navigate = useNavigate();
 
   const handleAvatarClick = () => {
     if (!allowedToEdit) {
@@ -113,14 +116,34 @@ const UserProfile = ({
     setUserPosts(updatedUserPosts);
   };
 
-  const handleCreateConversation = async () => {
-    if (curUserId === id) {
+  const handleGoToConversation = async () => {
+    console.log("loggedIn: ", loggedIn);
+    console.log("curUserId: ", curUserId);
+    console.log("otherUserId: ", id);
+    if (!loggedIn) {
       return;
+    } else if (curUserId === id) {
+      return;
+    } else if (conversations.length > 0) {
+      console.log("convos.len > 0: ", conversations);
+      const convos = conversations.map((c) => {
+        const participantIds = c.participants.map((p) => p.id);
+        return { id: c.id, participants: participantIds };
+      });
+      const convo = convos.find(
+        (c) => c.participants.includes(id) && c.participants.includes(curUserId)
+      );
+      //console.log("convoId", convo);
+      if (convo) {
+        navigate(`/conversations/${convo.id}`);
+        return;
+      }
     }
 
     try {
       const convoObj = { participants: [curUserId, id] };
-      conversationService.createConversation(convoObj);
+      const newConvo = await createConversation(convoObj);
+      navigate(`/conversations/${newConvo.id}`);
     } catch (error) {
       console.log("Error creating conversation", error);
     }
@@ -274,7 +297,7 @@ const UserProfile = ({
           </Button>
         )}
         {loggedIn && curUserId !== id && (
-          <Button onClick={handleCreateConversation}>Messgae</Button>
+          <Button onClick={handleGoToConversation}>Messgae</Button>
         )}
       </Box>
 
