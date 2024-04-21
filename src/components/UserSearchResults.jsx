@@ -16,7 +16,6 @@ const UserSearchResults = () => {
   const search = new URLSearchParams(location.search).get("search");
 
   useEffect(() => {
-    console.log(search);
     userService
       .getUsersByUsername(search)
       .then((foundUsers) => {

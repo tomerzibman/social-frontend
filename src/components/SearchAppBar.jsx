@@ -59,7 +59,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-export default function SearchAppBar({ loggedIn, photo }) {
+export default function SearchAppBar({ loggedIn, photo, curUserId }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -81,6 +81,15 @@ export default function SearchAppBar({ loggedIn, photo }) {
     handleMobileMenuClose();
   };
 
+  const goToProfile = () => {
+    handleMenuClose();
+    if (curUserId !== null) {
+      navigate(`/user/${curUserId}`);
+    } else {
+      navigate("/login");
+    }
+  };
+
   const logout = () => {
     handleMenuClose();
     window.localStorage.clear();
@@ -96,7 +105,6 @@ export default function SearchAppBar({ loggedIn, photo }) {
     if (event.key !== "Enter") {
       return;
     }
-    console.log("ABOUT TO SHOW RESULTS");
     navigate(`/users/?search=${searchQuery}`);
   };
 
@@ -117,7 +125,7 @@ export default function SearchAppBar({ loggedIn, photo }) {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+      <MenuItem onClick={goToProfile}>Profile</MenuItem>
       <MenuItem onClick={logout}>Logout</MenuItem>
     </Menu>
   );
@@ -175,7 +183,7 @@ export default function SearchAppBar({ loggedIn, photo }) {
   );
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
+    <Box sx={{ flexGrow: 1, marginBottom: 1 }}>
       <AppBar position="static">
         <Toolbar>
           <IconButton

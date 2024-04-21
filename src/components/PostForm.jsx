@@ -10,7 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 
-const PostForm = ({ createPost }) => {
+const PostForm = ({ createPost, name }) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [open, setOpen] = useState(false);
@@ -61,7 +61,9 @@ const PostForm = ({ createPost }) => {
         </Button>
       </Box>
       <Dialog open={open} onClose={() => setOpen(false)}>
-        <DialogTitle>Create New Post</DialogTitle>
+        <DialogTitle>
+          {name ? `${name}, what's on your mind?` : "What's on your mind?"}
+        </DialogTitle>
         <DialogContent>
           <TextField
             autoFocus

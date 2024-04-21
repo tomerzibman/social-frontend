@@ -6,6 +6,7 @@ import Feed from "./components/Feed";
 import PostForm from "./components/PostForm";
 import LoginOrSignUp from "./components/LoginOrSignUp";
 import SearchAppBar from "./components/SearchAppBar";
+import Loading from "./components/Loading";
 
 import postsService from "./services/posts";
 import loginService from "./services/login";
@@ -114,6 +115,7 @@ function App() {
         <SearchAppBar
           loggedIn={loggedIn}
           photo={user && user.photo ? user.photo : null}
+          curUserId={user !== null ? user.id : null}
         />
         <Routes>
           <Route
@@ -124,13 +126,22 @@ function App() {
             path="/"
             element={
               <>
-                {loggedIn && <PostForm createPost={createPost} />}{" "}
-                <Feed
-                  posts={posts}
-                  incrementLikeOf={incrementLikeOf}
-                  createComment={createComment}
-                  loggedIn={loggedIn}
-                />
+                {loggedIn && posts.length > 0 && (
+                  <PostForm
+                    createPost={createPost}
+                    name={user !== null ? user.name.split(" ")[0] : null}
+                  />
+                )}{" "}
+                {posts.length > 0 ? (
+                  <Feed
+                    posts={posts}
+                    incrementLikeOf={incrementLikeOf}
+                    createComment={createComment}
+                    loggedIn={loggedIn}
+                  />
+                ) : (
+                  <Loading />
+                )}
               </>
             }
           />

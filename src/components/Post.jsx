@@ -17,10 +17,16 @@ const Post = ({
   createComment,
   photo,
   loggedIn,
+  posterId,
 }) => {
   return (
     <Card sx={{ maxWidth: 600, margin: "auto", marginBottom: 2 }}>
-      <PostHeader username={username} date={createdAt} photo={photo} />
+      <PostHeader
+        username={username}
+        date={createdAt}
+        photo={photo}
+        posterId={posterId}
+      />
       <PostContent title={title} content={content} />
       <PostActions
         likes={likes}

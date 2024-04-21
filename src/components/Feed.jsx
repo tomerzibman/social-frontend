@@ -21,6 +21,7 @@ const Feed = ({ posts, incrementLikeOf, createComment, loggedIn }) => {
             createComment={createComment}
             photo={post.user.photo}
             loggedIn={loggedIn}
+            posterId={post.user.id}
           />
         </div>
       ))}

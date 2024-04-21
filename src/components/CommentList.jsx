@@ -9,6 +9,7 @@ import {
   Box,
   Paper,
 } from "@mui/material";
+import { Link } from "react-router-dom";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
@@ -45,7 +46,12 @@ const CommentList = ({ comments }) => {
                       backgroundColor: "grey.200",
                     }}
                   >
-                    <Typography variant="subtitle2" color="textPrimary">
+                    <Typography
+                      variant="subtitle2"
+                      color="textPrimary"
+                      component={Link}
+                      to={`/user/${comment.user.id}`}
+                    >
                       {comment.user.username}
                     </Typography>
                     <Typography
