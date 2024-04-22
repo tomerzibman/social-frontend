@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  CircularProgress,
   Container,
   Typography,
   Avatar,
@@ -18,6 +17,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from "@mui/icons-material/Save";
 import userService from "../services/user";
+import Loading from "./Loading";
 
 const UserProfile = ({
   incrementLikeOf,
@@ -180,16 +180,7 @@ const UserProfile = ({
   };
 
   if (!user) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        height="100vh"
-      >
-        <CircularProgress disableShrink />
-      </Box>
-    );
+    return <Loading />;
   }
 
   return (

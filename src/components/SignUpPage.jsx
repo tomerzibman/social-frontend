@@ -25,6 +25,7 @@ const SignUpPage = ({ handleSignUp }) => {
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const checkUsername = (text) => {
     if (!text) {
@@ -127,8 +128,8 @@ const SignUpPage = ({ handleSignUp }) => {
       checkPassword(password) &
       checkConfirmPassword(confirmPassword);
     if (!valid) {
+      setErrorMessage("Signup failed: invalid input");
       setShowError(true);
-      console.log("we have errors");
       return;
     }
 
@@ -147,6 +148,36 @@ const SignUpPage = ({ handleSignUp }) => {
       setConfirmPassword("");
     } catch (error) {
       console.log("Signup failed: ", error);
+      if (error.response && error.response.data) {
+        const err = error.response.data;
+        err.status = error.response.status;
+        if (err.status === 400 && err.type === "ajv val") {
+          err.error.forEach((error) => {
+            const path = error.instancePath.substring(1);
+            const message = error.message;
+            if (path === "username") {
+              setUsernameError(message);
+            } else if (path === "name") {
+              setNameError(message);
+            } else if (path === "password") {
+              setPasswordError(message);
+            } else {
+              setConfirmPasswordError(message);
+            }
+          });
+          setErrorMessage("Signup failed: invalid input");
+          setShowError(true);
+        } else if (err.status === 400 && err.message === "username taken") {
+          setUsernameError("Username taken: choose a different name");
+          setErrorMessage("Signup failed: invalid input");
+          setShowError(true);
+        } else {
+          setErrorMessage(
+            "An unexpected error occured while creating your account"
+          );
+          setShowError(true);
+        }
+      }
     }
   };
 
@@ -248,7 +279,7 @@ const SignUpPage = ({ handleSignUp }) => {
       </Card>
       <Notification
         varient="error"
-        message="Signup failed, invalid input"
+        message={errorMessage}
         open={showError}
         handleClose={handleClose}
       />

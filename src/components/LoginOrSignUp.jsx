@@ -42,7 +42,7 @@ const LoginOrSignUp = ({ handleLogin }) => {
       </Box>
       <Notification
         varient="success"
-        message="Account created successfully! Please login now."
+        message="Account created successfully! Please login"
         open={showSuccess}
         handleClose={handleClose}
       />
