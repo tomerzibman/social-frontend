@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Container } from "@mui/material";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
@@ -8,21 +8,52 @@ import LoginOrSignUp from "./components/LoginOrSignUp";
 import SearchAppBar from "./components/SearchAppBar";
 import Loading from "./components/Loading";
 import Conversations from "./components/Conversations";
+import UserProfile from "./components/UserProfile";
+import UserSearchResults from "./components/UserSearchResults";
 
 import postsService from "./services/posts";
 import loginService from "./services/login";
 import userService from "./services/user";
 import conversationService from "./services/conversations";
 import commentService from "./services/comments";
-import UserProfile from "./components/UserProfile";
-import UserSearchResults from "./components/UserSearchResults";
+import messageService from "./services/messages";
+
+import { socket } from "./socket";
 
 function App() {
   const [posts, setPosts] = useState([]);
   const [user, setUser] = useState(null);
   const [conversations, setConversations] = useState([]);
+  const [selectedConversation, setSelectedConversation] = useState(null);
+  const [messages, setMessages] = useState([]);
+
+  const messagesEndRef = useRef(null);
 
   const loggedIn = user != null;
+
+  useEffect(() => {
+    const onConnect = () => {
+      console.log("socket connected");
+    };
+    const onDisconnect = () => {
+      console.log("socket disconnected");
+    };
+    const onNewMessage = (message) => {
+      console.log("on newMessage: ", message.content);
+      setMessages((prevMessages) => [...prevMessages, message]);
+      setTimeout(messagesEndRef.current.scrollToBottom, 50);
+    };
+
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+    socket.on("newMessage", onNewMessage);
+
+    return () => {
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+      socket.off("newMessage", onNewMessage);
+    };
+  }, []);
 
   useEffect(() => {
     postsService
@@ -52,6 +83,21 @@ function App() {
     }
   }, [user]);
 
+  const handleConversationClick = async (conversation) => {
+    setSelectedConversation(conversation);
+    socket.emit("joinConversation", conversation.id);
+
+    try {
+      const curMessages = await messageService.getMessagesForConversation(
+        conversation.id
+      );
+      setMessages(curMessages);
+      setTimeout(messagesEndRef.current.scrollToBottom, 50);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleLogin = async (credentials) => {
     const userData = await loginService.login(credentials);
     setUser(userData);
@@ -71,16 +117,6 @@ function App() {
     );
     setPosts(updatedPosts);
     return likedPost;
-
-    // try {
-    //   const likedPost = await postsService.update(updatedPost, postId);
-    //   const updatedPosts = posts.map((post) =>
-    //     post.id == postId ? likedPost : post
-    //   );
-    //   setPosts(updatedPosts);
-    // } catch (error) {
-    //   console.log(error);
-    // }
   };
 
   const createPost = async (postToAdd) => {
@@ -184,6 +220,10 @@ function App() {
               <Conversations
                 userId={user !== null ? user.id : null}
                 conversations={conversations}
+                messages={messages}
+                selectedConversation={selectedConversation}
+                handleConversationClick={handleConversationClick}
+                ref={messagesEndRef}
               />
             }
           />
@@ -193,22 +233,13 @@ function App() {
               <Conversations
                 userId={user !== null ? user.id : null}
                 conversations={conversations}
+                messages={messages}
+                selectedConversation={selectedConversation}
+                ref={messagesEndRef}
               />
             }
           />
         </Routes>
-        {/* {!loggedIn ? (
-          <LoginOrSignUp handleLogin={handleLogin} />
-        ) : (
-          <>
-            <PostForm createPost={createPost} />
-            <Feed
-              posts={posts}
-              incrementLikeOf={incrementLikeOf}
-              createComment={createComment}
-            />
-          </>
-        )} */}
       </Router>
     </Container>
   );

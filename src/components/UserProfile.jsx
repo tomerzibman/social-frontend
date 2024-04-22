@@ -117,15 +117,11 @@ const UserProfile = ({
   };
 
   const handleGoToConversation = async () => {
-    console.log("loggedIn: ", loggedIn);
-    console.log("curUserId: ", curUserId);
-    console.log("otherUserId: ", id);
     if (!loggedIn) {
       return;
     } else if (curUserId === id) {
       return;
     } else if (conversations.length > 0) {
-      console.log("convos.len > 0: ", conversations);
       const convos = conversations.map((c) => {
         const participantIds = c.participants.map((p) => p.id);
         return { id: c.id, participants: participantIds };
@@ -133,7 +129,6 @@ const UserProfile = ({
       const convo = convos.find(
         (c) => c.participants.includes(id) && c.participants.includes(curUserId)
       );
-      //console.log("convoId", convo);
       if (convo) {
         navigate(`/conversations/${convo.id}`);
         return;
