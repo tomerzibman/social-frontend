@@ -1,8 +1,8 @@
-import { Paper, Typography } from "@mui/material";
+import { Paper, Typography, Box } from "@mui/material";
 
 const MyMessage = ({ username, content }) => {
   return (
-    <div
+    <Box
       style={{
         display: "flex",
         justifyContent: "flex-end",
@@ -32,7 +32,7 @@ const MyMessage = ({ username, content }) => {
           {content}
         </Typography>
       </Paper>
-    </div>
+    </Box>
   );
 };
 

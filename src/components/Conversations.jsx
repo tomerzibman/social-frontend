@@ -80,6 +80,12 @@ const Conversations = forwardRef((props, ref) => {
     setMessageInput("");
   };
 
+  const handleKeyMessageSubmit = (event) => {
+    if (event.key === "Enter") {
+      handleMessageSubmit();
+    }
+  };
+
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -134,7 +140,7 @@ const Conversations = forwardRef((props, ref) => {
             flexDirection: "column",
           }}
         >
-          <Stack direction="row" sx={{ p: 2 }}>
+          <Stack direction="row" sx={{ p: 2, paddingBottom: 1 }}>
             {props.selectedConversation && (
               <Avatar
                 src={
@@ -153,7 +159,9 @@ const Conversations = forwardRef((props, ref) => {
                 : "Select a conversation"}
             </Typography>
           </Stack>
-          <Divider sx={{ marginBottom: 2 }} />
+          {props.selectedConversation && (
+            <Divider sx={{ borderBottomWidth: 1 }} />
+          )}
           <Box
             sx={{
               flex: 1,
@@ -169,7 +177,7 @@ const Conversations = forwardRef((props, ref) => {
             <div ref={messagesEndRef} />
           </Box>
           {props.selectedConversation !== null && (
-            <Box sx={{ padding: "16px", borderTop: "1px solid #e0e0e0" }}>
+            <Box sx={{ padding: "30px 20px", borderTop: "1px solid #e0e0e0" }}>
               <Grid container spacing={2} alignItems="center">
                 <Grid item xs={10}>
                   <TextField
@@ -177,6 +185,7 @@ const Conversations = forwardRef((props, ref) => {
                     variant="outlined"
                     placeholder="Type a message"
                     value={messageInput}
+                    onKeyDown={handleKeyMessageSubmit}
                     onChange={handleMessageChange}
                   />
                 </Grid>
