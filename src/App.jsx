@@ -17,6 +17,7 @@ import userService from "./services/user";
 import conversationService from "./services/conversations";
 import commentService from "./services/comments";
 import messageService from "./services/messages";
+import unreadCountService from "./services/unreadCounts";
 
 import { socket } from "./socket";
 
@@ -26,6 +27,8 @@ function App() {
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [messages, setMessages] = useState([]);
+  const [unreadCounts, setUnreadCounts] = useState([]);
+  const [connected, setConnected] = useState(false);
 
   const messagesEndRef = useRef(null);
 
@@ -33,27 +36,49 @@ function App() {
 
   useEffect(() => {
     const onConnect = () => {
+      setConnected(true);
       console.log("socket connected");
     };
     const onDisconnect = () => {
+      setConnected(false);
       console.log("socket disconnected");
     };
     const onNewMessage = (message) => {
       console.log("on newMessage: ", message.content);
+      socket.emit("markAsRead", {
+        conversation: message.conversation,
+        participant: user.id,
+      });
       setMessages((prevMessages) => [...prevMessages, message]);
       setTimeout(messagesEndRef.current.scrollToBottom, 50);
+    };
+    const onUpdateUnreadCount = (updatedUnreadCount) => {
+      console.log("on updateUnreadCount");
+      console.log(updatedUnreadCount);
+      setUnreadCounts(
+        unreadCounts.map((uc) =>
+          uc.participant.toString() ===
+            updatedUnreadCount.participant.toString() &&
+          uc.conversation.toString() ===
+            updatedUnreadCount.conversation.toString()
+            ? updatedUnreadCount
+            : uc
+        )
+      );
     };
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     socket.on("newMessage", onNewMessage);
+    socket.on("updateUnreadCount", onUpdateUnreadCount);
 
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
       socket.off("newMessage", onNewMessage);
+      socket.off("updateUnreadCount", onUpdateUnreadCount);
     };
-  }, []);
+  }, [user, unreadCounts]);
 
   useEffect(() => {
     postsService
@@ -83,9 +108,32 @@ function App() {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (user) {
+      unreadCountService.getUnreadCounts(user.id).then((userUnreadCounts) => {
+        setUnreadCounts(userUnreadCounts);
+      });
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      socket.connect();
+      socket.emit("joinReceiver", user.id);
+
+      return () => {
+        socket.disconnect();
+      };
+    }
+  }, [user]);
+
   const handleConversationClick = async (conversation) => {
     setSelectedConversation(conversation);
     socket.emit("joinConversation", conversation.id);
+    socket.emit("markAsRead", {
+      conversation: conversation.id,
+      participant: user.id,
+    });
 
     try {
       const curMessages = await messageService.getMessagesForConversation(
@@ -176,6 +224,9 @@ function App() {
           loggedIn={loggedIn}
           photo={user && user.photo ? user.photo : null}
           curUserId={user !== null ? user.id : null}
+          unreadCount={unreadCounts.reduce((total, unreadCount) => {
+            return total + unreadCount.count;
+          }, 0)}
         />
         <Routes>
           <Route
@@ -232,6 +283,8 @@ function App() {
                 messages={messages}
                 selectedConversation={selectedConversation}
                 handleConversationClick={handleConversationClick}
+                connected={connected}
+                unreadCounts={unreadCounts}
                 ref={messagesEndRef}
               />
             }
@@ -244,6 +297,8 @@ function App() {
                 conversations={conversations}
                 messages={messages}
                 selectedConversation={selectedConversation}
+                connected={connected}
+                unreadCounts={unreadCounts}
                 ref={messagesEndRef}
               />
             }

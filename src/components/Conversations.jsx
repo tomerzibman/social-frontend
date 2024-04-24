@@ -52,12 +52,16 @@ const Conversations = forwardRef((props, ref) => {
   const { convoId } = useParams();
 
   useEffect(() => {
-    socket.connect();
+    if (!props.connected) {
+      socket.connect();
+    }
 
     return () => {
-      socket.disconnect();
+      if (props.connected) {
+        socket.disconnect();
+      }
     };
-  }, []);
+  }, [props.connected]);
 
   useEffect(() => {
     if (props.conversations.length > 0 && convoId) {
@@ -146,6 +150,7 @@ const Conversations = forwardRef((props, ref) => {
             <ConversationList
               conversations={props.conversations}
               userId={props.userId}
+              unreadCounts={props.unreadCounts}
             />
           </Paper>
         </Grid>

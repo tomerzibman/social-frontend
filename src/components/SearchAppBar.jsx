@@ -2,6 +2,7 @@ import * as React from "react";
 import { styled, alpha } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
+import Badge from "@mui/material/Badge";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import InputBase from "@mui/material/InputBase";
@@ -58,7 +59,12 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-export default function SearchAppBar({ loggedIn, photo, curUserId }) {
+export default function SearchAppBar({
+  loggedIn,
+  photo,
+  curUserId,
+  unreadCount,
+}) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -232,7 +238,13 @@ export default function SearchAppBar({ loggedIn, photo, curUserId }) {
                     color="inherit"
                     onClick={goToConversations}
                   >
-                    <ChatIcon />
+                    <Badge
+                      badgeContent={unreadCount}
+                      invisible={unreadCount <= 0}
+                      color="error"
+                    >
+                      <ChatIcon />
+                    </Badge>
                   </IconButton>
                 </Tooltip>
                 <IconButton
