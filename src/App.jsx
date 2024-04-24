@@ -107,13 +107,19 @@ function App() {
     window.localStorage.setItem("loggedInUser", JSON.stringify(userData));
   };
 
-  const incrementLikeOf = async (postId) => {
-    const post = posts.find((post) => post.id == postId);
-    const updatedPost = { ...post, likes: post.likes + 1 };
-
-    const likedPost = await postsService.update(updatedPost, postId);
+  const likePost = async (postId) => {
+    const likedPost = await postsService.like(postId);
     const updatedPosts = posts.map((post) =>
-      post.id == postId ? likedPost : post
+      post.id === postId ? likedPost : post
+    );
+    setPosts(updatedPosts);
+    return likedPost;
+  };
+
+  const unlikePost = async (postId) => {
+    const likedPost = await postsService.unlike(postId);
+    const updatedPosts = posts.map((post) =>
+      post.id === postId ? likedPost : post
     );
     setPosts(updatedPosts);
     return likedPost;
@@ -189,9 +195,11 @@ function App() {
                 {posts.length > 0 ? (
                   <Feed
                     posts={posts}
-                    incrementLikeOf={incrementLikeOf}
+                    likePost={likePost}
+                    unlikePost={unlikePost}
                     createComment={createComment}
                     loggedIn={loggedIn}
+                    userId={user !== null ? user.id : null}
                   />
                 ) : (
                   <Loading />
@@ -204,7 +212,8 @@ function App() {
             path="/user/:id"
             element={
               <UserProfile
-                incrementLikeOf={incrementLikeOf}
+                likePost={likePost}
+                unlikePost={unlikePost}
                 createComment={createComment}
                 loggedIn={loggedIn}
                 curUserId={user !== null ? user.id : null}

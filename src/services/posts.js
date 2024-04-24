@@ -28,4 +28,20 @@ const update = async (postObject, postId) => {
   return response.data;
 };
 
-export default { setToken, getAll, create, update };
+const like = async (postId) => {
+  const config = {
+    headers: { Authorization: token },
+  };
+  const response = await axios.put(`${baseUrl}/like/${postId}`, {}, config);
+  return response.data;
+};
+
+const unlike = async (postId) => {
+  const config = {
+    headers: { Authorization: token },
+  };
+  const response = await axios.put(`${baseUrl}/unlike/${postId}`, {}, config);
+  return response.data;
+};
+
+export default { setToken, getAll, create, update, like, unlike };

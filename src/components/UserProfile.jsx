@@ -20,7 +20,8 @@ import userService from "../services/user";
 import Loading from "./Loading";
 
 const UserProfile = ({
-  incrementLikeOf,
+  likePost,
+  unlikePost,
   createComment,
   loggedIn,
   curUserId,
@@ -109,7 +110,15 @@ const UserProfile = ({
   };
 
   const handleLikePost = async (postId) => {
-    const likedPost = await incrementLikeOf(postId);
+    const likedPost = await likePost(postId);
+    const updatedUserPosts = userPosts.map((up) =>
+      up.id === likedPost.id ? likedPost : up
+    );
+    setUserPosts(updatedUserPosts);
+  };
+
+  const handleUnlikePost = async (postId) => {
+    const likedPost = await unlikePost(postId);
     const updatedUserPosts = userPosts.map((up) =>
       up.id === likedPost.id ? likedPost : up
     );
@@ -295,9 +304,11 @@ const UserProfile = ({
 
       <Feed
         posts={userPosts}
-        incrementLikeOf={handleLikePost}
+        likePost={handleLikePost}
+        unlikePost={handleUnlikePost}
         createComment={createComment}
         loggedIn={loggedIn}
+        userId={curUserId}
       />
       <Notification
         varient={notificationData.varient}

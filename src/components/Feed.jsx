@@ -1,6 +1,13 @@
 import Post from "./Post";
 
-const Feed = ({ posts, incrementLikeOf, createComment, loggedIn }) => {
+const Feed = ({
+  posts,
+  likePost,
+  unlikePost,
+  createComment,
+  loggedIn,
+  userId,
+}) => {
   const sortedPosts = [...posts].sort(
     (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
   );
@@ -17,11 +24,13 @@ const Feed = ({ posts, incrementLikeOf, createComment, loggedIn }) => {
             likes={post.likes}
             comments={post.comments}
             createdAt={post.createdAt}
-            incrementLike={() => incrementLikeOf(post.id)}
+            onLike={() => likePost(post.id)}
+            onUnlike={() => unlikePost(post.id)}
             createComment={createComment}
             photo={post.user.photo}
             loggedIn={loggedIn}
             posterId={post.user.id}
+            userId={userId}
           />
         </div>
       ))}

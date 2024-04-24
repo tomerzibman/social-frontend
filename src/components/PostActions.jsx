@@ -1,11 +1,19 @@
 import { useState } from "react";
 import { CardActions, Divider, IconButton, Typography } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import CommentIcon from "@mui/icons-material/Comment";
 
 import Notification from "./Notification";
 
-const PostActions = ({ likes, commentsCount, onLike, loggedIn }) => {
+const PostActions = ({
+  likes,
+  commentsCount,
+  onLike,
+  onUnlike,
+  loggedIn,
+  userId,
+}) => {
   const [warnUser, setWarnUser] = useState(false);
 
   const handleClose = (event, reason) => {
@@ -15,13 +23,17 @@ const PostActions = ({ likes, commentsCount, onLike, loggedIn }) => {
     setWarnUser(false);
   };
 
-  const likePost = async () => {
+  const interactLike = async () => {
     if (!loggedIn) {
       setWarnUser(true);
       return;
     }
     try {
-      await onLike();
+      if (likes.includes(userId)) {
+        await onUnlike();
+      } else {
+        await onLike();
+      }
     } catch (error) {
       console.log(error);
     }
@@ -30,11 +42,15 @@ const PostActions = ({ likes, commentsCount, onLike, loggedIn }) => {
   return (
     <>
       <CardActions disableSpacing>
-        <IconButton aria-label="add to favorites" onClick={likePost}>
-          <FavoriteIcon />
+        <IconButton aria-label="add to favorites" onClick={interactLike}>
+          {likes.includes(userId) ? (
+            <FavoriteIcon sx={{ color: "red" }} />
+          ) : (
+            <FavoriteBorderIcon />
+          )}
         </IconButton>
         <Typography variant="body2" color="text.secondary">
-          {likes} Likes
+          {likes.length} Likes
         </Typography>
         <IconButton aria-label="comment">
           <CommentIcon />

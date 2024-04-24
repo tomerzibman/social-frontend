@@ -13,11 +13,13 @@ const Post = ({
   likes,
   createdAt,
   comments,
-  incrementLike,
+  onLike,
+  onUnlike,
   createComment,
   photo,
   loggedIn,
   posterId,
+  userId,
 }) => {
   return (
     <Card sx={{ maxWidth: 600, margin: "auto", marginBottom: 2 }}>
@@ -31,8 +33,10 @@ const Post = ({
       <PostActions
         likes={likes}
         commentsCount={comments.length}
-        onLike={incrementLike}
+        onLike={onLike}
+        onUnlike={onUnlike}
         loggedIn={loggedIn}
+        userId={userId}
       />
       <Divider />
       {comments.length > 0 && (
