@@ -4,16 +4,15 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
 import InputBase from "@mui/material/InputBase";
-//import Badge from "@mui/material/Badge";
-import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
-import MenuIcon from "@mui/icons-material/Menu";
+import Tooltip from "@mui/material/Tooltip";
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
-//import MailIcon from "@mui/icons-material/Mail";
+import LoginIcon from "@mui/icons-material/Login";
+import LogoutIcon from "@mui/icons-material/Logout";
+import HomeIcon from "@mui/icons-material/Home";
 import ChatIcon from "@mui/icons-material/Chat";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import { useNavigate, Link } from "react-router-dom";
@@ -98,6 +97,7 @@ export default function SearchAppBar({ loggedIn, photo, curUserId }) {
   };
 
   const goToConversations = () => {
+    handleMenuClose();
     if (loggedIn) {
       navigate("/conversations");
     }
@@ -153,18 +153,13 @@ export default function SearchAppBar({ loggedIn, photo, curUserId }) {
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
-      <MenuItem>
-        <IconButton
-          size="large"
-          aria-label="show 4 new mails"
-          color="inherit"
-          onClick={goToConversations}
-        >
+      <MenuItem onClick={goToConversations}>
+        <IconButton size="large" aria-label="show 4 new mails" color="inherit">
           <ChatIcon />
         </IconButton>
         <p>Messages</p>
       </MenuItem>
-      <MenuItem onClick={handleProfileMenuOpen}>
+      <MenuItem onClick={goToProfile}>
         <IconButton
           size="large"
           aria-label="account of current user"
@@ -176,6 +171,12 @@ export default function SearchAppBar({ loggedIn, photo, curUserId }) {
         </IconButton>
         <p>Profile</p>
       </MenuItem>
+      <MenuItem onClick={logout}>
+        <IconButton size="large" aria-haspopup="true" color="inherit">
+          <LogoutIcon />
+        </IconButton>
+        <p>Logout</p>
+      </MenuItem>
     </Menu>
   );
 
@@ -183,16 +184,18 @@ export default function SearchAppBar({ loggedIn, photo, curUserId }) {
     <Box sx={{ flexGrow: 1, marginBottom: 1 }}>
       <AppBar position="static">
         <Toolbar>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="open drawer"
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography
+          <Tooltip title="Home">
+            <IconButton
+              size="large"
+              edge="start"
+              color="inherit"
+              component={Link}
+              to="/"
+            >
+              <HomeIcon />
+            </IconButton>
+          </Tooltip>
+          {/* <Typography
             variant="h6"
             noWrap
             component="div"
@@ -205,7 +208,7 @@ export default function SearchAppBar({ loggedIn, photo, curUserId }) {
             >
               Home
             </Button>
-          </Typography>
+          </Typography> */}
           <Search>
             <SearchIconWrapper>
               <SearchIcon />
@@ -222,14 +225,16 @@ export default function SearchAppBar({ loggedIn, photo, curUserId }) {
           {loggedIn && (
             <>
               <Box sx={{ display: { xs: "none", md: "flex" } }}>
-                <IconButton
-                  size="large"
-                  aria-label="show 4 new mails"
-                  color="inherit"
-                  onClick={goToConversations}
-                >
-                  <ChatIcon />
-                </IconButton>
+                <Tooltip title="Messages">
+                  <IconButton
+                    size="large"
+                    aria-label="show 4 new mails"
+                    color="inherit"
+                    onClick={goToConversations}
+                  >
+                    <ChatIcon />
+                  </IconButton>
+                </Tooltip>
                 <IconButton
                   size="large"
                   edge="end"
@@ -262,17 +267,11 @@ export default function SearchAppBar({ loggedIn, photo, curUserId }) {
             </>
           )}
           {!loggedIn && (
-            <Box sx={{ display: { xs: "none", md: "flex" } }}>
-              <Button
-                onClick={handleMenuClose}
-                sx={{ my: 2, color: "white", display: "block" }}
-                component={Link}
-                to="/login"
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                Login
-              </Button>
-            </Box>
+            <Tooltip title="login">
+              <IconButton color="inherit" component={Link} to="/login">
+                <LoginIcon />
+              </IconButton>
+            </Tooltip>
           )}
         </Toolbar>
       </AppBar>

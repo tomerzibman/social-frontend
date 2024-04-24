@@ -5,37 +5,44 @@ import {
   forwardRef,
   useImperativeHandle,
 } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
   Box,
+  Drawer,
   Grid,
+  IconButton,
   Paper,
-  List,
-  ListItem,
-  ListItemText,
   Typography,
   TextField,
   Button,
   Divider,
   Avatar,
   Stack,
+  Tooltip,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
+import MenuIcon from "@mui/icons-material/Menu";
 
 import Messages from "./Messages";
+import ConversationList from "./ConversationList";
 import { socket } from "../socket";
 
 const Conversations = forwardRef((props, ref) => {
   const [messageInput, setMessageInput] = useState("");
+  const [maxHeight, setMaxHeight] = useState(0);
+  const [isCompactView, setIsCompactView] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const messagesEndRef = useRef(null);
+  const paperRef = useRef();
 
   useImperativeHandle(
     ref,
     () => {
       return {
         scrollToBottom() {
-          messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+          setDrawerOpen(false);
+          messagesEndRef.current.scrollIntoView({ behavior: "auto" });
         },
       };
     },
@@ -59,6 +66,40 @@ const Conversations = forwardRef((props, ref) => {
       );
     }
   }, [convoId, props.conversations]);
+
+  useEffect(() => {
+    const calculateMaxHeight = () => {
+      const isOverflowActive = (event) => {
+        if (!event) {
+          return false;
+        }
+        return event.offsetWidth < event.scrollWidth;
+      };
+
+      const heightOffset = 230;
+      const windowHeight = window.innerHeight;
+      const newMaxHeight = windowHeight - heightOffset;
+      setMaxHeight(newMaxHeight);
+      setIsCompactView(window.innerWidth < 800);
+      if (window.innerWidth < 800) {
+        setIsCompactView(true);
+      } else if (
+        window.innerWidth >= 800 &&
+        isOverflowActive(paperRef.current)
+      ) {
+        setIsCompactView(true);
+      } else {
+        setIsCompactView(false);
+      }
+    };
+
+    calculateMaxHeight();
+    window.addEventListener("resize", calculateMaxHeight);
+
+    return () => {
+      window.removeEventListener("resize", calculateMaxHeight);
+    };
+  }, []);
 
   const handleMessageChange = (e) => {
     setMessageInput(e.target.value);
@@ -93,45 +134,37 @@ const Conversations = forwardRef((props, ref) => {
   };
 
   return (
-    <Grid container spacing={2} sx={{ height: "calc(100vh - 64px)" }}>
-      {" "}
-      {/* 64px is the height of the AppBar */}
+    <Grid container spacing={1} sx={{ height: "calc(100vh - 64px)" }}>
       {/* Conversations List */}
-      <Grid item xs={3}>
-        <Paper elevation={3} sx={{ height: "100%", overflow: "auto" }}>
-          <List>
-            {props.conversations.map((conversation) => (
-              <Box key={conversation.id}>
-                <ListItem
-                  button
-                  key={conversation.id}
-                  component={Link}
-                  to={`/conversations/${conversation.id}`}
-                >
-                  <Avatar
-                    src={
-                      conversation.participants.find(
-                        (p) => p.id !== props.userId
-                      ).photo
-                    }
-                    sx={{ marginRight: 1 }}
-                  />
-                  <ListItemText
-                    primary={
-                      conversation.participants.find(
-                        (p) => p.id !== props.userId
-                      ).username
-                    }
-                  />
-                </ListItem>
-                <Divider />
-              </Box>
-            ))}
-          </List>
-        </Paper>
-      </Grid>
+      {!isCompactView && (
+        <Grid item xs={2.5}>
+          <Paper
+            elevation={3}
+            sx={{ height: "100%", overflow: "auto" }}
+            ref={paperRef}
+          >
+            <ConversationList
+              conversations={props.conversations}
+              userId={props.userId}
+            />
+          </Paper>
+        </Grid>
+      )}
+      {isCompactView && (
+        <Drawer
+          variant="temporary"
+          anchor="left"
+          open={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+        >
+          <ConversationList
+            conversations={props.conversations}
+            userId={props.userId}
+          />
+        </Drawer>
+      )}
       {/* Selected Conversation */}
-      <Grid item xs={9}>
+      <Grid item xs={!isCompactView ? 9.5 : 12}>
         <Paper
           elevation={3}
           sx={{
@@ -141,6 +174,16 @@ const Conversations = forwardRef((props, ref) => {
           }}
         >
           <Stack direction="row" sx={{ p: 2, paddingBottom: 1 }}>
+            {isCompactView && (
+              <Tooltip title="Conversations">
+                <IconButton
+                  onClick={() => setDrawerOpen(!drawerOpen)}
+                  sx={{ marginRight: 1 }}
+                >
+                  <MenuIcon />
+                </IconButton>
+              </Tooltip>
+            )}
             {props.selectedConversation && (
               <Avatar
                 src={
@@ -151,7 +194,7 @@ const Conversations = forwardRef((props, ref) => {
                 sx={{ marginRight: 1 }}
               />
             )}
-            <Typography variant="h6">
+            <Typography variant="h6" sx={{ marginTop: 0.5 }}>
               {props.selectedConversation
                 ? props.selectedConversation.participants.find(
                     (p) => p.id !== props.userId
@@ -165,42 +208,33 @@ const Conversations = forwardRef((props, ref) => {
           <Box
             sx={{
               flex: 1,
-              overflowY: "auto",
-              padding: "0 16px",
-              maxHeight: 600,
-              display: "flex",
-              flexDirection: "column",
-              scrollBehavior: "smooth",
+              overflow: "auto",
+              p: 2,
+              maxHeight: `${maxHeight}px`,
             }}
           >
             <Messages messages={props.messages} userId={props.userId} />
             <div ref={messagesEndRef} />
           </Box>
           {props.selectedConversation !== null && (
-            <Box sx={{ padding: "30px 20px", borderTop: "1px solid #e0e0e0" }}>
-              <Grid container spacing={2} alignItems="center">
-                <Grid item xs={10}>
-                  <TextField
-                    fullWidth
-                    variant="outlined"
-                    placeholder="Type a message"
-                    value={messageInput}
-                    onKeyDown={handleKeyMessageSubmit}
-                    onChange={handleMessageChange}
-                  />
-                </Grid>
-                <Grid item xs={2}>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                    onClick={handleMessageSubmit}
-                    disabled={messageInput.length == 0}
-                  >
-                    <SendIcon sx={{ marginRight: 0.5 }} /> Send
-                  </Button>
-                </Grid>
-              </Grid>
+            <Box p={2} borderTop="1px solid #e0e0e0">
+              <Stack direction="row">
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  placeholder="Type a message"
+                  value={messageInput}
+                  onKeyDown={handleKeyMessageSubmit}
+                  onChange={handleMessageChange}
+                />
+
+                <Button
+                  onClick={handleMessageSubmit}
+                  disabled={messageInput.length == 0}
+                >
+                  <SendIcon />
+                </Button>
+              </Stack>
             </Box>
           )}
         </Paper>
