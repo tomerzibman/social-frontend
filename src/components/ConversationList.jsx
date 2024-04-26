@@ -25,26 +25,35 @@ const ConversationList = ({ conversations, userId, unreadCounts }) => {
               disablePadding
               sx={{ paddingBottom: 0.5, paddingTop: 0.5 }}
             >
-              <Badge
-                badgeContent={unreadCount}
-                invisible={unreadCount <= 0}
-                color="error"
+              <ListItemButton
+                component={Link}
+                to={`/conversations/${conversation.id}`}
               >
-                <ListItemButton
-                  component={Link}
-                  to={`/conversations/${conversation.id}`}
-                >
-                  <Avatar src={other.photo} />
-                  <ListItemText
-                    sx={{ marginLeft: 2 }}
-                    primary={
-                      <Typography variant="subtitle1">
-                        {other.username}
-                      </Typography>
-                    }
-                  />
-                </ListItemButton>
-              </Badge>
+                <Avatar src={other.photo} />
+                <ListItemText
+                  sx={{
+                    marginLeft: 2,
+                  }}
+                  primary={
+                    <Typography
+                      variant="subtitle1"
+                      sx={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {other.username}
+                    </Typography>
+                  }
+                />
+                <Badge
+                  badgeContent={unreadCount}
+                  invisible={unreadCount <= 0}
+                  color="error"
+                  sx={{ marginLeft: 2 }}
+                />
+              </ListItemButton>
             </ListItem>
             <Divider />
           </Box>

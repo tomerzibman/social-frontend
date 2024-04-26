@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { Divider, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import LocalizedFormat from "dayjs/plugin/localizedFormat";
@@ -10,6 +10,19 @@ dayjs.extend(LocalizedFormat);
 
 const Messages = ({ messages, userId }) => {
   let prevDateStr = null;
+  const [lastReadAt, setLastReadAt] = useState(null);
+  const [lastMessageId, setlastMessageId] = useState(null);
+
+  useEffect(() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].sender.id === userId && messages[i].readAt) {
+        console.log(messages[i]);
+        setlastMessageId(messages[i].id);
+        setLastReadAt(messages[i].readAt);
+        break;
+      }
+    }
+  }, [messages, userId]);
 
   return messages.map((message) => {
     const curDate = new Date(message.createdAt);
@@ -35,6 +48,7 @@ const Messages = ({ messages, userId }) => {
             key={message.id}
             username={"You"}
             content={message.content}
+            readAt={lastMessageId === message.id ? lastReadAt : null}
           />
         ) : (
           <OtherMessage

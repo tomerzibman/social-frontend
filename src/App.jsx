@@ -28,7 +28,7 @@ function App() {
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [unreadCounts, setUnreadCounts] = useState([]);
-  const [connected, setConnected] = useState(false);
+  const [connected, setConnected] = useState(socket.connected);
 
   const messagesEndRef = useRef(null);
 
@@ -39,24 +39,54 @@ function App() {
       setConnected(true);
       console.log("socket connected");
     };
+
     const onDisconnect = () => {
       setConnected(false);
       console.log("socket disconnected");
     };
+
     const onNewMessage = (message) => {
       console.log("on newMessage: ", message.content);
-      socket.emit("markAsRead", {
+
+      console.log("emit resetUnreadCount");
+      socket.emit("resetUnreadCount", {
         conversation: message.conversation,
         participant: user.id,
       });
+
+      // const updatedMessages = [...messages, message];
+      // setMessages(updatedMessages);
       setMessages((prevMessages) => [...prevMessages, message]);
-      setTimeout(messagesEndRef.current.scrollToBottom, 50);
+
+      if (message.sender.id.toString() !== user.id.toString()) {
+        console.log("emit markAsRead:", message.content);
+        const dateiso = new Date().toISOString();
+        socket.emit("markAsRead", {
+          id: message.id,
+          sender: message.sender.id,
+          readAt: dateiso,
+        });
+      }
+
+      messagesEndRef.current.scrollToBottom;
+      // console.log(message.sender.id.toString());
+      // console.log(user.id.toString());
+      // if (message.sender.id.toString() !== user.id.toString()) {
+      //   const dateiso = new Date().toISOString();
+      //   const readMessage = { ...message, readAt: dateiso };
+      //   setMessages((prevMessages) => [...prevMessages, readMessage]);
+      //   console.log("emit markAsRead");
+      //   socket.emit("markAsRead", { ...message, readAt: dateiso });
+      // } else {
+      //   setMessages((prevMessages) => [...prevMessages, message]);
+      // }
+      // setTimeout(messagesEndRef.current.scrollToBottom, 50);
     };
+
     const onUpdateUnreadCount = (updatedUnreadCount) => {
       console.log("on updateUnreadCount");
-      console.log(updatedUnreadCount);
-      setUnreadCounts(
-        unreadCounts.map((uc) =>
+      setUnreadCounts((prevUnreadCounts) =>
+        prevUnreadCounts.map((uc) =>
           uc.participant.toString() ===
             updatedUnreadCount.participant.toString() &&
           uc.conversation.toString() ===
@@ -67,18 +97,56 @@ function App() {
       );
     };
 
+    const onMessageRead = (messageData) => {
+      console.log("on messageRead");
+      setMessages((prevMessages) =>
+        prevMessages.map((message) =>
+          message.id === messageData.id
+            ? { ...message, readAt: messageData.readAt }
+            : message
+        )
+      );
+      // const updatedMessages = messages.map((message) => {
+      //   if (message.id.toString() === messageData.id.toString()) {
+      //     console.log("attaching read reciept");
+      //     return { ...message, readAt: messageData.readAt };
+      //   }
+      //   return message;
+      // });
+      // setMessages(updatedMessages);
+    };
+
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     socket.on("newMessage", onNewMessage);
     socket.on("updateUnreadCount", onUpdateUnreadCount);
+    socket.on("messageRead", onMessageRead);
 
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
       socket.off("newMessage", onNewMessage);
       socket.off("updateUnreadCount", onUpdateUnreadCount);
+      socket.off("messageRead", onMessageRead);
     };
-  }, [user, unreadCounts]);
+  }, [user, unreadCounts, messages]);
+
+  useEffect(() => {
+    if (user && connected) {
+      socket.emit("joinReceiver", user.id);
+    }
+  }, [user, connected]);
+
+  useEffect(() => {
+    // no-op if the socket is already connected
+    console.log("calling socket.connect()");
+    socket.connect();
+
+    return () => {
+      console.log("calling socket.disconnect()");
+      socket.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     postsService
@@ -93,7 +161,7 @@ function App() {
     const loggedInUser = window.localStorage.getItem("loggedInUser");
     if (loggedInUser) {
       const userData = JSON.parse(loggedInUser);
-      setUser(userData);
+      setUser(() => userData);
       postsService.setToken(userData.token);
       commentService.setToken(userData.token);
       userService.setToken(userData.token);
@@ -116,21 +184,11 @@ function App() {
     }
   }, [user]);
 
-  useEffect(() => {
-    if (user) {
-      socket.connect();
-      socket.emit("joinReceiver", user.id);
-
-      return () => {
-        socket.disconnect();
-      };
-    }
-  }, [user]);
-
   const handleConversationClick = async (conversation) => {
     setSelectedConversation(conversation);
+    console.log("emit joinConversation");
     socket.emit("joinConversation", conversation.id);
-    socket.emit("markAsRead", {
+    socket.emit("resetUnreadCount", {
       conversation: conversation.id,
       participant: user.id,
     });
@@ -139,11 +197,15 @@ function App() {
       const curMessages = await messageService.getMessagesForConversation(
         conversation.id
       );
-      setMessages(curMessages);
+      setMessages(() => curMessages);
       setTimeout(messagesEndRef.current.scrollToBottom, 50);
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const deselectConversation = () => {
+    setSelectedConversation(() => null);
   };
 
   const handleLogin = async (credentials) => {
@@ -285,6 +347,7 @@ function App() {
                 handleConversationClick={handleConversationClick}
                 connected={connected}
                 unreadCounts={unreadCounts}
+                deselectConversation={deselectConversation}
                 ref={messagesEndRef}
               />
             }
@@ -297,8 +360,10 @@ function App() {
                 conversations={conversations}
                 messages={messages}
                 selectedConversation={selectedConversation}
+                handleConversationClick={handleConversationClick}
                 connected={connected}
                 unreadCounts={unreadCounts}
+                deselectConversation={deselectConversation}
                 ref={messagesEndRef}
               />
             }

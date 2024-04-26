@@ -1,38 +1,56 @@
-import { Paper, Typography, Box } from "@mui/material";
+import { Paper, Typography, Box, Stack } from "@mui/material";
+import dayjs from "dayjs";
+import calendar from "dayjs/plugin/calendar";
+dayjs.extend(calendar);
 
-const MyMessage = ({ username, content }) => {
+const MyMessage = ({ username, content, readAt }) => {
   return (
-    <Box
-      style={{
-        display: "flex",
-        justifyContent: "flex-end",
-        marginBottom: "8px",
-      }}
-    >
-      <Paper
-        elevation={3}
-        square={false}
-        sx={{
-          maxWidth: "70%",
-          padding: "8px 12px",
-          backgroundColor: "#2196f3",
-          marginRight: "8px",
+    <Stack>
+      <Box
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          marginBottom: "8px",
         }}
       >
-        <Typography
-          variant="subtitle2"
-          style={{ textAlign: "right", marginBottom: "4px", color: "white" }}
+        <Paper
+          elevation={3}
+          square={false}
+          sx={{
+            maxWidth: "70%",
+            padding: "8px 12px",
+            backgroundColor: "#2196f3",
+            marginRight: "8px",
+          }}
         >
-          {username}
-        </Typography>
+          <Typography
+            variant="subtitle2"
+            style={{ textAlign: "right", marginBottom: "4px", color: "white" }}
+          >
+            {username}
+          </Typography>
+          <Typography
+            variant="body1"
+            style={{ textAlign: "right", color: "white" }}
+          >
+            {content}
+          </Typography>
+        </Paper>
+      </Box>
+      {readAt && (
         <Typography
-          variant="body1"
-          style={{ textAlign: "right", color: "white" }}
+          variant="caption"
+          color="gray"
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginBottom: "8px",
+          }}
         >
-          {content}
+          Read {dayjs().calendar(dayjs(new Date(readAt)))}
         </Typography>
-      </Paper>
-    </Box>
+      )}
+    </Stack>
   );
 };
 

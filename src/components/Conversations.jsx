@@ -52,16 +52,26 @@ const Conversations = forwardRef((props, ref) => {
   const { convoId } = useParams();
 
   useEffect(() => {
-    if (!props.connected) {
-      socket.connect();
+    // if (!props.connected) {
+    //   socket.connect();
+    // }
+    if (convoId) {
+      console.log(`emit joinConversation : ${convoId}`);
+      socket.emit("joinConversation", convoId);
     }
+    // if (props.userId) {
+    //   console.log(`emit joinReceiver : ${props.userId}`);
+    //   socket.emit("joinReceiver", props.userId);
+    // }
 
     return () => {
-      if (props.connected) {
-        socket.disconnect();
+      if (props.connected && convoId) {
+        console.log("emit leaveConversation");
+        socket.emit("leaveConversation", convoId);
       }
+      props.deselectConversation();
     };
-  }, [props.connected]);
+  }, [convoId, props.connected]);
 
   useEffect(() => {
     if (props.conversations.length > 0 && convoId) {
@@ -165,6 +175,7 @@ const Conversations = forwardRef((props, ref) => {
           <ConversationList
             conversations={props.conversations}
             userId={props.userId}
+            unreadCounts={props.unreadCounts}
           />
         </Drawer>
       )}
@@ -218,7 +229,9 @@ const Conversations = forwardRef((props, ref) => {
               maxHeight: `${maxHeight}px`,
             }}
           >
-            <Messages messages={props.messages} userId={props.userId} />
+            {props.selectedConversation && (
+              <Messages messages={props.messages} userId={props.userId} />
+            )}
             <div ref={messagesEndRef} />
           </Box>
           {props.selectedConversation !== null && (
