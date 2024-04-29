@@ -47,7 +47,7 @@ const MyMessage = ({ username, content, readAt }) => {
             marginBottom: "8px",
           }}
         >
-          Read {dayjs().calendar(dayjs(new Date(readAt)))}
+          Read {dayjs(readAt).calendar()}
         </Typography>
       )}
     </Stack>

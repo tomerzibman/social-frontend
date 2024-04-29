@@ -116,11 +116,26 @@ function App() {
       // setMessages(updatedMessages);
     };
 
+    // when clicking into a convo, send an event to read all unread messages in unread count.
+    // Then send them back to here and update the messages
+    const onReadMessages = (data) => {
+      console.log("on readMessages");
+      console.log(data);
+      setMessages((prevMessages) =>
+        prevMessages.map((message) =>
+          data.messagesIds.includes(message.id)
+            ? { ...message, readAt: data.readAt }
+            : message
+        )
+      );
+    };
+
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     socket.on("newMessage", onNewMessage);
     socket.on("updateUnreadCount", onUpdateUnreadCount);
     socket.on("messageRead", onMessageRead);
+    socket.on("readMessages", onReadMessages);
 
     return () => {
       socket.off("connect", onConnect);
@@ -128,11 +143,13 @@ function App() {
       socket.off("newMessage", onNewMessage);
       socket.off("updateUnreadCount", onUpdateUnreadCount);
       socket.off("messageRead", onMessageRead);
+      socket.off("readMessages", onReadMessages);
     };
   }, [user, unreadCounts, messages]);
 
   useEffect(() => {
     if (user && connected) {
+      console.log("emit joinReceiver");
       socket.emit("joinReceiver", user.id);
     }
   }, [user, connected]);
@@ -188,10 +205,16 @@ function App() {
     setSelectedConversation(conversation);
     console.log("emit joinConversation");
     socket.emit("joinConversation", conversation.id);
-    socket.emit("resetUnreadCount", {
-      conversation: conversation.id,
-      participant: user.id,
-    });
+    // socket.emit("resetUnreadCount", {
+    //   conversation: conversation.id,
+    //   participant: user.id,
+    // });
+    // console.log("emit readUnreadMessages");
+    // socket.emit("readUnreadMessages", {
+    //   conversation: conversation.id,
+    //   sender: user.id,
+    //   reciver: conversation.participants.find((p) => p.id !== user.id).id,
+    // });
 
     try {
       const curMessages = await messageService.getMessagesForConversation(
@@ -199,6 +222,14 @@ function App() {
       );
       setMessages(() => curMessages);
       setTimeout(messagesEndRef.current.scrollToBottom, 50);
+
+      console.log("emit readUnreadMessages");
+      socket.emit("readUnreadMessages", {
+        conversation: conversation.id,
+        sender: user.id,
+        reciver: conversation.participants.find((p) => p.id !== user.id).id,
+        dateiso: new Date().toISOString(),
+      });
     } catch (error) {
       console.log(error);
     }

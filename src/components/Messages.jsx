@@ -17,8 +17,9 @@ const Messages = ({ messages, userId }) => {
     for (let i = messages.length - 1; i >= 0; i--) {
       if (messages[i].sender.id === userId && messages[i].readAt) {
         console.log(messages[i]);
-        setlastMessageId(messages[i].id);
-        setLastReadAt(messages[i].readAt);
+        setlastMessageId(() => messages[i].id);
+        setLastReadAt(() => messages[i].readAt);
+        //console.log("dayjs readAt: ", dayjs(messages[i].readAt).calendar());
         break;
       }
     }
